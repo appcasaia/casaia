@@ -55,6 +55,8 @@ const T = {
     historyToday: "Hoy",
     bizTechBtn: "Soy técnico / empresa",
     bizAgencyBtn: "Soy inmobiliaria / administrador",
+    emergencyHint: "Solo para emergencias reales — gas, agua, electricidad o encierro",
+    supportLabel: "Soporte técnico de la app",
     emergencyBtn: "Emergencia",
     priorityAlta: "URGENTE",
     priorityMedia: "PRIORIDAD MEDIA",
@@ -92,6 +94,8 @@ const T = {
     historyToday: "Hoje",
     bizTechBtn: "Sou técnico / empresa",
     bizAgencyBtn: "Sou imobiliária / administrador",
+    emergencyHint: "Apenas para emergências reais — gás, água, elétrica ou trancado(a)",
+    supportLabel: "Suporte técnico do app",
     emergencyBtn: "Emergência",
     priorityAlta: "URGENTE",
     priorityMedia: "PRIORIDADE MÉDIA",
@@ -129,6 +133,8 @@ const T = {
     historyToday: "Today",
     bizTechBtn: "I'm a technician / business",
     bizAgencyBtn: "I'm a real estate agency / manager",
+    emergencyHint: "Only for real emergencies — gas, water, electrical, or locked out",
+    supportLabel: "App technical support",
     emergencyBtn: "Emergency",
     priorityAlta: "URGENT",
     priorityMedia: "MEDIUM PRIORITY",
@@ -166,6 +172,8 @@ const T = {
     historyToday: "Aujourd'hui",
     bizTechBtn: "Je suis technicien / entreprise",
     bizAgencyBtn: "Je suis agence immobilière / gestionnaire",
+    emergencyHint: "Uniquement pour les urgences réelles — gaz, eau, électricité ou porte bloquée",
+    supportLabel: "Support technique de l'application",
     emergencyBtn: "Urgence",
     priorityAlta: "URGENT",
     priorityMedia: "PRIORITÉ MOYENNE",
@@ -203,6 +211,8 @@ const T = {
     historyToday: "Heute",
     bizTechBtn: "Ich bin Techniker / Unternehmen",
     bizAgencyBtn: "Ich bin Immobilienverwaltung",
+    emergencyHint: "Nur für echte Notfälle — Gas, Wasser, Strom oder ausgesperrt",
+    supportLabel: "Technischer Support der App",
     emergencyBtn: "Notfall",
     priorityAlta: "DRINGEND",
     priorityMedia: "MITTLERE PRIORITÄT",
@@ -930,6 +940,9 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
             </div>
           )}
 
+          <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "#8A7A5C", marginBottom: 8, textAlign: "center", maxWidth: 400 }}>
+            {t.emergencyHint}
+          </p>
           <button
             onClick={startEmergency}
             style={{
@@ -977,6 +990,22 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
               </a>
             </div>
           )}
+
+          <a
+            href="mailto:casaia24h@gmail.com"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              marginTop: 18,
+              color: "#8A7A5C",
+              fontFamily: "Inter, sans-serif",
+              fontSize: 11.5,
+              textDecoration: "none",
+            }}
+          >
+            <Mail size={12} /> {t.supportLabel}
+          </a>
         </div>
 
         <style>{`.spin { animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
