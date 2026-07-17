@@ -92,7 +92,7 @@ export async function POST(req) {
 
     // Siempre se le avisa al administrador.
     await resend.emails.send({
-      from: process.env.LEAD_EMAIL_FROM || "onboarding@resend.dev",
+      from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
       to: adminEmail,
       subject: matches.length
         ? `${urgentPrefix}Nuevo lead - CasaIA (derivado vía ${sourceLabel}): ${name}`
@@ -104,7 +104,7 @@ export async function POST(req) {
     for (const m of matches) {
       if (m.email) {
         await resend.emails.send({
-          from: process.env.LEAD_EMAIL_FROM || "onboarding@resend.dev",
+          from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
           to: m.email,
           subject: `${urgentPrefix}Nueva consulta derivada por CasaIA: ${name}`,
           text: emailBody,
@@ -116,7 +116,7 @@ export async function POST(req) {
     // avisarle también directamente a ella (además de a sus técnicos y al admin).
     if (isUrgent && agency && agency.email) {
       await resend.emails.send({
-        from: process.env.LEAD_EMAIL_FROM || "onboarding@resend.dev",
+        from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
         to: agency.email,
         subject: `🚨 URGENTE en tu propiedad — CasaIA: ${name}`,
         text: `Se registró un caso URGENTE en una de tus propiedades gestionadas por CasaIA.\n\n${emailBody}`,

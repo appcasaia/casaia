@@ -51,7 +51,7 @@ export async function POST(req) {
       const resend = new Resend(process.env.RESEND_API_KEY);
       const adminEmail = process.env.LEAD_EMAIL_TO || "casaia24h@gmail.com";
       await resend.emails.send({
-        from: process.env.LEAD_EMAIL_FROM || "onboarding@resend.dev",
+        from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
         to: adminEmail,
         subject: `Nuevo técnico registrado en CasaIA: ${nombre}`,
         text: `Nombre: ${nombre}\nEmpresa: ${empresa || "-"}\nTeléfono: ${telefono}\nEmail: ${email || "-"}\nLocalidad: ${localidad || "-"}\nZonas: ${newTech.zonas.join(", ")}\nEspecialidades: ${especialidades || "-"}\nHorarios: ${horarios || "-"}\nPlan: gratis (por defecto)`,

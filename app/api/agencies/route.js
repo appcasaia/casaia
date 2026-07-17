@@ -69,7 +69,7 @@ export async function POST(req) {
       const resend = new Resend(process.env.RESEND_API_KEY);
       const adminEmail = process.env.LEAD_EMAIL_TO || "casaia24h@gmail.com";
       await resend.emails.send({
-        from: process.env.LEAD_EMAIL_FROM || "onboarding@resend.dev",
+        from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
         to: adminEmail,
         subject: `Nueva inmobiliaria registrada en CasaIA: ${nombre}`,
         text: `Nombre: ${nombre}\nContacto: ${contacto}\nEmail: ${email}\nTeléfono: ${telefono || "-"}\nLocalidades: ${localidades || "-"}\nTécnicos declarados: ${cleanTecnicos.length}\nPropiedades declaradas: ${cleanPropiedades.length}\nLink exclusivo: ${clientLink}`,
@@ -81,7 +81,7 @@ export async function POST(req) {
 
       // Confirmación a la inmobiliaria con su link exclusivo y su link privado de edición.
       await resend.emails.send({
-        from: process.env.LEAD_EMAIL_FROM || "onboarding@resend.dev",
+        from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
         to: email,
         subject: "Tus links de CasaIA están listos",
         text: `Hola ${contacto},\n\nTu registro en CasaIA fue exitoso. Guardá estos links:\n\n1) LINK GENERAL PARA TUS CLIENTES (compartilo con huéspedes/inquilinos):\n${clientLink}\n\n2) LINK PRIVADO PARA EDITAR TUS DATOS (guardalo solo para vos, te permite modificar tus técnicos y propiedades cuando quieras, sin necesidad de contraseña):\n${editLink}${propertyLinksText}\n\nCuando un cliente entre desde el link general, va a ser atendido por la IA y derivado únicamente a los técnicos de confianza que vos cargaste. Si entra desde el link de una propiedad específica, la IA ya sabe en qué unidad está y responde directo (WiFi, claves, etc), sin preguntar nada de más — ideal para imprimir como QR y pegar en la puerta.\n\nSaludos,\nEquipo CasaIA`,
