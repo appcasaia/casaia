@@ -35,7 +35,7 @@ export async function POST(req) {
       );
     }
 
-    const adminEmail = process.env.LEAD_EMAIL_TO || "nlmaterialdigital@gmail.com";
+    const adminEmail = process.env.LEAD_EMAIL_TO || "casaia24h@gmail.com";
     let matches = []; // formato uniforme: { nombre, telefono, email, direccion }
     let sourceLabel = "";
     let agency = null;

@@ -49,7 +49,7 @@ export async function POST(req) {
     // Avisar al administrador por email de la nueva alta.
     if (process.env.RESEND_API_KEY) {
       const resend = new Resend(process.env.RESEND_API_KEY);
-      const adminEmail = process.env.LEAD_EMAIL_TO || "nlmaterialdigital@gmail.com";
+      const adminEmail = process.env.LEAD_EMAIL_TO || "casaia24h@gmail.com";
       await resend.emails.send({
         from: process.env.LEAD_EMAIL_FROM || "onboarding@resend.dev",
         to: adminEmail,
