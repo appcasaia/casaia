@@ -20,6 +20,7 @@ import {
   Building2,
   ChevronDown,
   Siren,
+  BadgeCheck,
 } from "lucide-react";
 
 const T = {
@@ -1185,8 +1186,35 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                   <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
                     {leadResult.referrals.map((ref, i) => (
                       <div key={i} style={{ paddingTop: i > 0 ? 16 : 0, borderTop: i > 0 ? "1px solid #2A3A36" : "none" }}>
-                        <div style={{ fontFamily: "'Roboto Slab', serif", fontSize: 22, fontWeight: 700, color: "#F3EDE2", marginBottom: 10 }}>
-                          {ref.nombre}
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+                          <div style={{ fontFamily: "'Roboto Slab', serif", fontSize: 22, fontWeight: 700, color: "#F3EDE2" }}>
+                            {ref.nombre}
+                          </div>
+                          {ref.verificado && (
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 4,
+                                padding: "3px 10px",
+                                borderRadius: 999,
+                                background: ref.destacado ? "#C4622A" : "#2A3A36",
+                                border: ref.destacado ? "none" : "1px solid #7FA893",
+                              }}
+                            >
+                              <BadgeCheck size={13} color={ref.destacado ? "#FFFFFF" : "#7FA893"} />
+                              <span
+                                style={{
+                                  fontFamily: "'IBM Plex Mono', monospace",
+                                  fontSize: 10,
+                                  color: ref.destacado ? "#FFFFFF" : "#7FA893",
+                                  textTransform: "uppercase",
+                                }}
+                              >
+                                {ref.destacado ? "Técnico destacado" : "Técnico verificado"}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>

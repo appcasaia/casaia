@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Lock, Loader2, Building2, Copy, Check, Trash2 } from "lucide-react";
+import { Lock, Loader2, Building2, Copy, Check, Trash2, LockOpen } from "lucide-react";
+
+const PLAN_COLORS = { gratis: "#8A7A5C", profesional: "#5B7065", premium: "#C4622A" };
 
 export default function InmobiliariasPanelPage() {
   const [key, setKey] = useState("");
@@ -32,6 +34,31 @@ export default function InmobiliariasPanelPage() {
     navigator.clipboard.writeText(`https://casaia.net/i/${slug}`);
     setCopiedSlug(slug);
     setTimeout(() => setCopiedSlug(null), 2000);
+  };
+
+  const updateAgency = async (id, updates) => {
+    const res = await fetch("/api/agencies", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: key.trim(), id, updates }),
+    });
+    if (res.ok) {
+      setAgencies((prev) =>
+        prev.map((a) => {
+          if (a.id !== id) return a;
+          const merged = { ...a, ...updates };
+          if (updates.planesHabilitados) {
+            merged.planesHabilitados = { ...a.planesHabilitados, ...updates.planesHabilitados };
+          }
+          return merged;
+        })
+      );
+    }
+  };
+
+  const togglePlanHabilitado = async (agency, plan) => {
+    const actual = agency.planesHabilitados?.[plan] !== false;
+    await updateAgency(agency.id, { planesHabilitados: { [plan]: !actual } });
   };
 
   const deleteAgency = async (id, nombre) => {
@@ -118,6 +145,62 @@ export default function InmobiliariasPanelPage() {
                 <button onClick={() => copyLink(ag.slug)} style={{ border: "none", background: "transparent", cursor: "pointer" }}>
                   {copiedSlug === ag.slug ? <Check size={14} color="#2A5A3E" /> : <Copy size={14} color="#5B7065" />}
                 </button>
+              </div>
+              <div style={{ display: "flex", gap: 6, marginTop: 10, alignItems: "center", flexWrap: "wrap" }}>
+                {["gratis", "profesional", "premium"].map((plan) => {
+                  const habilitado = ag.planesHabilitados?.[plan] !== false;
+                  return (
+                    <div key={plan} style={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <button
+                        onClick={() => habilitado && updateAgency(ag.id, { plan })}
+                        disabled={!habilitado}
+                        title={!habilitado ? "Plan deshabilitado para esta inmobiliaria" : undefined}
+                        style={{
+                          padding: "4px 10px",
+                          borderRadius: "999px 0 0 999px",
+                          border: `1px solid ${(ag.plan || "gratis") === plan ? PLAN_COLORS[plan] : "#E0D8C7"}`,
+                          borderRight: "none",
+                          background: (ag.plan || "gratis") === plan ? PLAN_COLORS[plan] : "transparent",
+                          color: (ag.plan || "gratis") === plan ? "#FFFFFF" : "#8A7A5C",
+                          fontFamily: "'IBM Plex Mono', monospace",
+                          fontSize: 10,
+                          textTransform: "uppercase",
+                          opacity: habilitado ? 1 : 0.35,
+                          cursor: habilitado ? "pointer" : "not-allowed",
+                        }}
+                      >
+                        {plan}
+                      </button>
+                      <button
+                        onClick={() => togglePlanHabilitado(ag, plan)}
+                        title={habilitado ? "Deshabilitar este plan para esta inmobiliaria" : "Habilitar este plan para esta inmobiliaria"}
+                        style={{
+                          padding: "4px 6px",
+                          borderRadius: "0 999px 999px 0",
+                          border: `1px solid ${(ag.plan || "gratis") === plan ? PLAN_COLORS[plan] : "#E0D8C7"}`,
+                          background: (ag.plan || "gratis") === plan ? PLAN_COLORS[plan] : "transparent",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {habilitado ? (
+                          <LockOpen size={10} color={(ag.plan || "gratis") === plan ? "#FFFFFF" : "#5B7065"} />
+                        ) : (
+                          <Lock size={10} color={(ag.plan || "gratis") === plan ? "#FFFFFF" : "#B5401F"} />
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+                {ag.planesHabilitados?.[ag.plan || "gratis"] === false && (
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#B5401F", border: "1px solid #B5401F", borderRadius: 999, padding: "2px 8px" }}>
+                    bloqueada — su panel muestra invitación a suscribirse
+                  </span>
+                )}
+                {ag.subscription && (
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#8A7A5C", marginLeft: 4 }}>
+                    de alta desde {new Date(ag.subscription.startDate).toLocaleDateString("es-AR")}
+                  </span>
+                )}
               </div>
             </div>
           ))}

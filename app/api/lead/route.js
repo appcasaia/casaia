@@ -5,6 +5,7 @@ import { getTechnicians, findTechniciansForZone } from "../../../lib/technicians
 import { findAgencyBySlug } from "../../../lib/agencies";
 import { checkRateLimit, getClientIp } from "../../../lib/rateLimit";
 import { verifyTurnstile } from "../../../lib/turnstile";
+import { TECHNICIAN_PLAN_LIMITS } from "../../../lib/subscriptions";
 
 export async function POST(req) {
   try {
@@ -64,6 +65,10 @@ export async function POST(req) {
           telefono: t.telefono,
           email: t.email || null,
           direccion: null,
+          // Prestación de plan: badge visible para profesional/premium,
+          // "destacado" adicional solo para premium.
+          verificado: TECHNICIAN_PLAN_LIMITS[t.plan]?.badge || false,
+          destacado: t.plan === "premium",
         }));
         sourceLabel = "técnico de zona";
       } else {

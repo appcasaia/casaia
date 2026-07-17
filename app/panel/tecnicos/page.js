@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Lock, Loader2, Wrench, ToggleLeft, ToggleRight, Trash2 } from "lucide-react";
+import { Lock, Loader2, Wrench, ToggleLeft, ToggleRight, Trash2, LockOpen } from "lucide-react";
 
 const PLAN_COLORS = { gratis: "#8A7A5C", profesional: "#5B7065", premium: "#C4622A" };
 
@@ -36,8 +36,27 @@ export default function TecnicosPanelPage() {
       body: JSON.stringify({ key: key.trim(), id, updates }),
     });
     if (res.ok) {
-      setTechnicians((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
+      setTechnicians((prev) =>
+        prev.map((t) => {
+          if (t.id !== id) return t;
+          const merged = { ...t, ...updates };
+          if (updates.planesHabilitados) {
+            merged.planesHabilitados = { ...t.planesHabilitados, ...updates.planesHabilitados };
+            // Si el plan activo justo se deshabilitó, el server lo vuelve a "gratis" — reflejarlo acá también.
+            if (merged.planesHabilitados[t.plan] === false) {
+              merged.plan = "gratis";
+            }
+          }
+          return merged;
+        })
+      );
     }
+  };
+
+  const togglePlanHabilitado = async (tech, plan) => {
+    const actual = tech.planesHabilitados?.[plan] !== false;
+    if (plan === "gratis") return; // nunca se puede tocar para técnicos
+    await updateTech(tech.id, { planesHabilitados: { [plan]: !actual } });
   };
 
   const deleteTech = async (id, nombre) => {
@@ -133,25 +152,58 @@ export default function TecnicosPanelPage() {
                   </button>
                 </div>
               </div>
-              <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
-                {["gratis", "profesional", "premium"].map((plan) => (
-                  <button
-                    key={plan}
-                    onClick={() => updateTech(tech.id, { plan })}
-                    style={{
-                      padding: "4px 10px",
-                      borderRadius: 999,
-                      border: `1px solid ${tech.plan === plan ? PLAN_COLORS[plan] : "#E0D8C7"}`,
-                      background: tech.plan === plan ? PLAN_COLORS[plan] : "transparent",
-                      color: tech.plan === plan ? "#FFFFFF" : "#8A7A5C",
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 10,
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {plan}
-                  </button>
-                ))}
+              <div style={{ display: "flex", gap: 6, marginTop: 10, alignItems: "center", flexWrap: "wrap" }}>
+                {["gratis", "profesional", "premium"].map((plan) => {
+                  const habilitado = plan === "gratis" || tech.planesHabilitados?.[plan] !== false;
+                  return (
+                    <div key={plan} style={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <button
+                        onClick={() => habilitado && updateTech(tech.id, { plan })}
+                        disabled={!habilitado}
+                        title={!habilitado ? "Plan deshabilitado para este técnico" : undefined}
+                        style={{
+                          padding: "4px 10px",
+                          borderRadius: "999px 0 0 999px",
+                          border: `1px solid ${tech.plan === plan ? PLAN_COLORS[plan] : "#E0D8C7"}`,
+                          borderRight: "none",
+                          background: tech.plan === plan ? PLAN_COLORS[plan] : "transparent",
+                          color: tech.plan === plan ? "#FFFFFF" : "#8A7A5C",
+                          fontFamily: "'IBM Plex Mono', monospace",
+                          fontSize: 10,
+                          textTransform: "uppercase",
+                          opacity: habilitado ? 1 : 0.35,
+                          cursor: habilitado ? "pointer" : "not-allowed",
+                        }}
+                      >
+                        {plan}
+                      </button>
+                      <button
+                        onClick={() => togglePlanHabilitado(tech, plan)}
+                        disabled={plan === "gratis"}
+                        title={plan === "gratis" ? "Siempre disponible para técnicos" : habilitado ? "Deshabilitar este plan para este técnico" : "Habilitar este plan para este técnico"}
+                        style={{
+                          padding: "4px 6px",
+                          borderRadius: "0 999px 999px 0",
+                          border: `1px solid ${tech.plan === plan ? PLAN_COLORS[plan] : "#E0D8C7"}`,
+                          background: tech.plan === plan ? PLAN_COLORS[plan] : "transparent",
+                          opacity: plan === "gratis" ? 0.3 : 1,
+                          cursor: plan === "gratis" ? "default" : "pointer",
+                        }}
+                      >
+                        {habilitado ? (
+                          <LockOpen size={10} color={tech.plan === plan ? "#FFFFFF" : "#5B7065"} />
+                        ) : (
+                          <Lock size={10} color={tech.plan === plan ? "#FFFFFF" : "#B5401F"} />
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+                {tech.subscription && (
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#8A7A5C", marginLeft: 4 }}>
+                    de alta desde {new Date(tech.subscription.startDate).toLocaleDateString("es-AR")}
+                  </span>
+                )}
               </div>
             </div>
           ))}

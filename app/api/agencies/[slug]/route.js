@@ -1,4 +1,5 @@
 import { findAgencyBySlug, saveAgencies, getAgencies, ensurePropertySlugs } from "../../../../lib/agencies";
+import { AGENCY_PLAN_LIMITS, estaBloqueadoPorPlan } from "../../../../lib/subscriptions";
 
 // Sin token: solo expone lo necesario para renderizar la landing del huésped
 // (nombre, técnicos, y la info práctica de las propiedades para que la IA
@@ -45,12 +46,34 @@ export async function PUT(req, { params }) {
       return Response.json({ error: "Token inválido" }, { status: 401 });
     }
 
+    if (estaBloqueadoPorPlan(agencies[idx])) {
+      return Response.json(
+        {
+          error: "Tu plan actual está desactivado. Escribinos para reactivar tu suscripción y seguir editando.",
+          suscripcionInactiva: true,
+        },
+        { status: 403 }
+      );
+    }
+
     const allowedFields = ["contacto", "telefono", "localidades", "tecnicos", "propiedades"];
     const safeUpdates = {};
     for (const field of allowedFields) {
       if (updates[field] !== undefined) safeUpdates[field] = updates[field];
     }
     if (safeUpdates.propiedades) {
+      const plan = agencies[idx].plan || "gratis";
+      const limit = AGENCY_PLAN_LIMITS[plan]?.maxProperties ?? AGENCY_PLAN_LIMITS.gratis.maxProperties;
+      if (safeUpdates.propiedades.length > limit) {
+        return Response.json(
+          {
+            error: `Tu plan (${plan}) permite hasta ${limit} propiedades. Pasate a un plan superior para cargar más.`,
+            limitAlcanzado: true,
+            limite: limit,
+          },
+          { status: 403 }
+        );
+      }
       safeUpdates.propiedades = ensurePropertySlugs(safeUpdates.propiedades);
     }
 

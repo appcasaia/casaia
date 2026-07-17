@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { getAgencies, saveAgencies, slugify, generateEditToken, ensurePropertySlugs } from "../../../lib/agencies";
 import { checkRateLimit, getClientIp } from "../../../lib/rateLimit";
 import { verifyTurnstile } from "../../../lib/turnstile";
+import { createSubscription, updateSubscriptionPlan, AGENCY_PLAN_LIMITS, defaultPlanesHabilitados } from "../../../lib/subscriptions";
 
 // Registro público de inmobiliarias/administradores de propiedades.
 export async function POST(req) {
@@ -36,7 +37,7 @@ export async function POST(req) {
 
     const cleanPropiedades = ensurePropertySlugs(
       Array.isArray(propiedades) ? propiedades.filter((p) => p.nombre) : []
-    );
+    ).slice(0, AGENCY_PLAN_LIMITS.gratis.maxProperties);
 
     const newAgency = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
@@ -52,6 +53,9 @@ export async function POST(req) {
       activo: true,
       createdAt: new Date().toISOString(),
       lastReminderAt: null,
+      plan: "gratis",
+      subscription: createSubscription("gratis"),
+      planesHabilitados: defaultPlanesHabilitados(),
     };
 
     agencies.push(newAgency);
@@ -105,6 +109,8 @@ export async function GET(req) {
   return Response.json({ agencies });
 }
 
+// Actualizar (ej: cambiar plan, activar/desactivar, o habilitar/deshabilitar
+// un plan puntual para ESTA inmobiliaria) desde el panel admin.
 export async function PATCH(req) {
   try {
     const { key, id, updates } = await req.json();
@@ -114,7 +120,32 @@ export async function PATCH(req) {
     const agencies = await getAgencies();
     const idx = agencies.findIndex((a) => a.id === id);
     if (idx === -1) return Response.json({ error: "No encontrado" }, { status: 404 });
-    agencies[idx] = { ...agencies[idx], ...updates };
+
+    const current = agencies[idx];
+    const merged = { ...current, ...updates };
+
+    // Habilitar/deshabilitar un plan puntual para esta inmobiliaria (no afecta a nadie más).
+    // A diferencia de los técnicos, acá SÍ se puede desactivar el plan gratis —
+    // es justamente lo que se usa para pedirle que se suscriba cuando arranque el cobro.
+    if (updates.planesHabilitados) {
+      merged.planesHabilitados = { ...(current.planesHabilitados || defaultPlanesHabilitados()), ...updates.planesHabilitados };
+      // Si el plan que tiene asignado ahora queda deshabilitado, no la cambiamos
+      // de plan automáticamente: queda "bloqueada" hasta que el admin la reactive
+      // o le habilite otro plan. Eso dispara el aviso de suscripción en su panel.
+    }
+
+    if (updates.plan && updates.plan !== current.plan) {
+      const habilitados = merged.planesHabilitados || current.planesHabilitados || defaultPlanesHabilitados();
+      if (habilitados[updates.plan] === false) {
+        return Response.json(
+          { error: `El plan "${updates.plan}" no está habilitado para esta inmobiliaria. Habilitalo primero.` },
+          { status: 400 }
+        );
+      }
+      merged.subscription = updateSubscriptionPlan(current.subscription, updates.plan);
+    }
+
+    agencies[idx] = merged;
     await saveAgencies(agencies);
     return Response.json({ ok: true });
   } catch (err) {

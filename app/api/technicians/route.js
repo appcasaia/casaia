@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { getTechnicians, saveTechnicians } from "../../../lib/technicians";
 import { checkRateLimit, getClientIp } from "../../../lib/rateLimit";
 import { verifyTurnstile } from "../../../lib/turnstile";
+import { createSubscription, updateSubscriptionPlan, TECHNICIAN_PLAN_LIMITS, defaultPlanesHabilitados, puedeDesactivarsePlan } from "../../../lib/subscriptions";
 
 // Registro público: cualquier técnico/empresa puede darse de alta.
 export async function POST(req) {
@@ -28,6 +29,10 @@ export async function POST(req) {
 
     const technicians = await getTechnicians();
 
+    const zonasDeclaradas = Array.isArray(zonas)
+      ? zonas
+      : String(zonas).split(",").map((z) => z.trim()).filter(Boolean);
+
     const newTech = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
       nombre,
@@ -35,12 +40,16 @@ export async function POST(req) {
       telefono,
       email: email || "",
       localidad: localidad || "",
-      zonas: Array.isArray(zonas) ? zonas : String(zonas).split(",").map((z) => z.trim()).filter(Boolean),
+      // Todo alta nueva arranca en plan gratis, así que limitamos acá mismo
+      // a la cantidad de zonas que permite ese plan.
+      zonas: zonasDeclaradas.slice(0, TECHNICIAN_PLAN_LIMITS.gratis.maxZonas),
       especialidades: especialidades || "",
       horarios: horarios || "",
       plan: "gratis",
       activo: true,
       createdAt: new Date().toISOString(),
+      subscription: createSubscription("gratis"),
+      planesHabilitados: defaultPlanesHabilitados(),
     };
 
     technicians.push(newTech);
@@ -76,7 +85,8 @@ export async function GET(req) {
   return Response.json({ technicians });
 }
 
-// Actualizar (ej: cambiar plan o activar/desactivar) desde el panel admin.
+// Actualizar (ej: cambiar plan, activar/desactivar, o habilitar/deshabilitar
+// un plan puntual para ESTE técnico) desde el panel admin.
 export async function PATCH(req) {
   try {
     const { key, id, updates } = await req.json();
@@ -86,7 +96,38 @@ export async function PATCH(req) {
     const technicians = await getTechnicians();
     const idx = technicians.findIndex((t) => t.id === id);
     if (idx === -1) return Response.json({ error: "No encontrado" }, { status: 404 });
-    technicians[idx] = { ...technicians[idx], ...updates };
+
+    const current = technicians[idx];
+    const merged = { ...current, ...updates };
+
+    // Habilitar/deshabilitar un plan puntual para este técnico (no afecta a nadie más).
+    if (updates.planesHabilitados) {
+      const nuevosHabilitados = { ...(current.planesHabilitados || defaultPlanesHabilitados()), ...updates.planesHabilitados };
+      // El plan gratis nunca se le puede quitar a un técnico.
+      if (!puedeDesactivarsePlan("tecnico", "gratis")) nuevosHabilitados.gratis = true;
+      merged.planesHabilitados = nuevosHabilitados;
+
+      // Si el plan que tenía asignado justo quedó deshabilitado, lo volvemos
+      // a gratis automáticamente (siempre disponible para técnicos).
+      if (nuevosHabilitados[current.plan] === false) {
+        merged.plan = "gratis";
+        merged.subscription = updateSubscriptionPlan(current.subscription, "gratis");
+      }
+    }
+
+    // Cambiar el plan actual del técnico: solo si ese plan está habilitado para él.
+    if (updates.plan && updates.plan !== current.plan) {
+      const habilitados = merged.planesHabilitados || current.planesHabilitados || defaultPlanesHabilitados();
+      if (habilitados[updates.plan] === false) {
+        return Response.json(
+          { error: `El plan "${updates.plan}" no está habilitado para este técnico. Habilitalo primero.` },
+          { status: 400 }
+        );
+      }
+      merged.subscription = updateSubscriptionPlan(current.subscription, updates.plan);
+    }
+
+    technicians[idx] = merged;
     await saveTechnicians(technicians);
     return Response.json({ ok: true });
   } catch (err) {

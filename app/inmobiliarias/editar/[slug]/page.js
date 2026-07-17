@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Building2, Loader2, Plus, Trash2, Save, Check, KeyRound } from "lucide-react";
+import { Building2, Loader2, Plus, Trash2, Save, Check, KeyRound, AlertCircle, Sparkles } from "lucide-react";
+import { AGENCY_PLAN_LIMITS, PLAN_LABELS, estaBloqueadoPorPlan } from "../../../../lib/subscriptions";
 
 const smallInput = {
   padding: "8px 10px",
@@ -86,7 +87,13 @@ export default function EditarInmobiliariaPage({ params, searchParams }) {
 
   const updateProp = (i, field, value) =>
     setPropiedades((prev) => prev.map((p, idx) => (idx === i ? { ...p, [field]: value } : p)));
-  const addProp = () => setPropiedades((prev) => [...prev, emptyPropiedad()]);
+  const propLimit = AGENCY_PLAN_LIMITS[agency?.plan || "gratis"]?.maxProperties ?? AGENCY_PLAN_LIMITS.gratis.maxProperties;
+  const propCount = propiedades.filter((p) => p.nombre.trim()).length;
+  const atLimit = propCount >= propLimit;
+  const addProp = () => {
+    if (atLimit) return;
+    setPropiedades((prev) => [...prev, emptyPropiedad()]);
+  };
   const removeProp = (i) => setPropiedades((prev) => prev.filter((_, idx) => idx !== i));
 
   const save = async () => {
@@ -132,6 +139,45 @@ export default function EditarInmobiliariaPage({ params, searchParams }) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F3EDE2", padding: 20 }}>
         <p style={{ fontFamily: "Inter, sans-serif", color: "#B5401F", textAlign: "center", maxWidth: 400 }}>{error}</p>
+      </div>
+    );
+  }
+
+  if (estaBloqueadoPorPlan(agency)) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F3EDE2", padding: 20 }}>
+        <div style={{ maxWidth: 440, textAlign: "center", background: "#FFFFFF", border: "1px solid #E9E2D2", borderRadius: 16, padding: 32 }}>
+          <Sparkles size={28} color="#C4622A" style={{ marginBottom: 12 }} />
+          <h1 style={{ fontFamily: "'Roboto Slab', serif", fontSize: 20, color: "#1F2D2B", marginBottom: 10 }}>
+            {agency.nombre}
+          </h1>
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#5B7065", lineHeight: 1.6, marginBottom: 8 }}>
+            Tu plan actual ({PLAN_LABELS[agency.plan] || agency.plan}) no está activo en este momento.
+            Escribinos para reactivar tu suscripción y seguir editando tus técnicos y propiedades.
+          </p>
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#5B7065", lineHeight: 1.6, marginBottom: 20 }}>
+            Seu plano atual ({PLAN_LABELS[agency.plan] || agency.plan}) não está ativo no momento.
+            Entre em contato para reativar sua assinatura e continuar editando.
+          </p>
+          <a
+            href={`mailto:casaia24h@gmail.com?subject=${encodeURIComponent("Quiero reactivar mi plan en CasaIA — " + agency.nombre)}`}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "10px 20px",
+              borderRadius: 10,
+              background: "#C4622A",
+              color: "#FFFFFF",
+              textDecoration: "none",
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 600,
+              fontSize: 14,
+            }}
+          >
+            Escribirnos / Fale conosco
+          </a>
+        </div>
       </div>
     );
   }
@@ -192,6 +238,27 @@ export default function EditarInmobiliariaPage({ params, searchParams }) {
           <br />
           Cada propriedade salva tem seu próprio link e QR (aparece abaixo dos dados) para imprimir e colar na porta.
         </p>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "8px 12px",
+            borderRadius: 8,
+            background: atLimit ? "#FBE4DB" : "#EFEAE0",
+            border: `1px solid ${atLimit ? "#D94E2A" : "#E0D8C7"}`,
+            marginBottom: 8,
+          }}
+        >
+          <AlertCircle size={14} color={atLimit ? "#B5401F" : "#8A7A5C"} />
+          <span style={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: atLimit ? "#7A2A14" : "#5B7065" }}>
+            {atLimit
+              ? `Llegaste al límite de tu plan ${PLAN_LABELS[agency?.plan || "gratis"]} (${propLimit} propiedades). Escribinos para pasar a un plan superior. / Você atingiu o limite do seu plano ${PLAN_LABELS[agency?.plan || "gratis"]} (${propLimit} propriedades). Fale conosco para mudar de plano.`
+              : propLimit === Infinity
+              ? "Tu plan permite propiedades ilimitadas. / Seu plano permite propriedades ilimitadas."
+              : `${propCount} de ${propLimit} propiedades usadas en tu plan ${PLAN_LABELS[agency?.plan || "gratis"]}. / ${propCount} de ${propLimit} propriedades usadas no seu plano ${PLAN_LABELS[agency?.plan || "gratis"]}.`}
+          </span>
+        </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 10, marginTop: 8 }}>
           {propiedades.map((prop, i) => (
             <div key={i} style={{ background: "#FFFFFF", border: "1px solid #E9E2D2", borderRadius: 10, padding: 10 }}>
@@ -232,7 +299,11 @@ export default function EditarInmobiliariaPage({ params, searchParams }) {
             </div>
           ))}
         </div>
-        <button onClick={addProp} style={dashedBtnStyle}>
+        <button
+          onClick={addProp}
+          disabled={atLimit}
+          style={{ ...dashedBtnStyle, opacity: atLimit ? 0.4 : 1, cursor: atLimit ? "not-allowed" : "pointer" }}
+        >
           <Plus size={14} /> Agregar propiedad / Adicionar propriedade
         </button>
 
