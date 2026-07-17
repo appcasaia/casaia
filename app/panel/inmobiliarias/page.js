@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Lock, Loader2, Building2, Copy, Check } from "lucide-react";
+import { Lock, Loader2, Building2, Copy, Check, Trash2 } from "lucide-react";
 
 export default function InmobiliariasPanelPage() {
   const [key, setKey] = useState("");
@@ -32,6 +32,18 @@ export default function InmobiliariasPanelPage() {
     navigator.clipboard.writeText(`https://casaia.net/i/${slug}`);
     setCopiedSlug(slug);
     setTimeout(() => setCopiedSlug(null), 2000);
+  };
+
+  const deleteAgency = async (id, nombre) => {
+    if (!window.confirm(`¿Eliminar a "${nombre}" y todos sus datos (técnicos, propiedades, links)? Esta acción no se puede deshacer.`)) return;
+    const res = await fetch("/api/agencies", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: key.trim(), id }),
+    });
+    if (res.ok) {
+      setAgencies((prev) => prev.filter((a) => a.id !== id));
+    }
   };
 
   if (!unlocked) {
@@ -78,7 +90,16 @@ export default function InmobiliariasPanelPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 20 }}>
           {agencies.map((ag) => (
             <div key={ag.id} style={{ background: "#FFFFFF", border: "1px solid #E9E2D2", borderRadius: 12, padding: 14 }}>
-              <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: 15, color: "#1F2D2B" }}>{ag.nombre}</div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: 15, color: "#1F2D2B" }}>{ag.nombre}</div>
+                <button
+                  onClick={() => deleteAgency(ag.id, ag.nombre)}
+                  style={{ border: "none", background: "transparent" }}
+                  title="Eliminar"
+                >
+                  <Trash2 size={18} color="#B5401F" />
+                </button>
+              </div>
               <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "#8A7A5C", marginTop: 2 }}>
                 {ag.contacto} · {ag.email} {ag.telefono && `· ${ag.telefono}`}
               </div>

@@ -122,3 +122,23 @@ export async function PATCH(req) {
     return Response.json({ error: "Error interno" }, { status: 500 });
   }
 }
+
+// Eliminar una inmobiliaria desde el panel admin.
+export async function DELETE(req) {
+  try {
+    const { key, id } = await req.json();
+    if (!process.env.ADMIN_SECRET || key !== process.env.ADMIN_SECRET) {
+      return Response.json({ error: "No autorizado" }, { status: 401 });
+    }
+    const agencies = await getAgencies();
+    const filtered = agencies.filter((a) => a.id !== id);
+    if (filtered.length === agencies.length) {
+      return Response.json({ error: "No encontrado" }, { status: 404 });
+    }
+    await saveAgencies(filtered);
+    return Response.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return Response.json({ error: "Error interno" }, { status: 500 });
+  }
+}

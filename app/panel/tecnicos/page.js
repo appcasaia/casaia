@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Lock, Loader2, Wrench, ToggleLeft, ToggleRight } from "lucide-react";
+import { Lock, Loader2, Wrench, ToggleLeft, ToggleRight, Trash2 } from "lucide-react";
 
 const PLAN_COLORS = { gratis: "#8A7A5C", profesional: "#5B7065", premium: "#C4622A" };
 
@@ -37,6 +37,18 @@ export default function TecnicosPanelPage() {
     });
     if (res.ok) {
       setTechnicians((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
+    }
+  };
+
+  const deleteTech = async (id, nombre) => {
+    if (!window.confirm(`¿Eliminar a "${nombre}" de la lista de técnicos? Esta acción no se puede deshacer.`)) return;
+    const res = await fetch("/api/technicians", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: key.trim(), id }),
+    });
+    if (res.ok) {
+      setTechnicians((prev) => prev.filter((t) => t.id !== id));
     }
   };
 
@@ -104,13 +116,22 @@ export default function TecnicosPanelPage() {
                     </div>
                   )}
                 </div>
-                <button
-                  onClick={() => updateTech(tech.id, { activo: !tech.activo })}
-                  style={{ border: "none", background: "transparent" }}
-                  title={tech.activo ? "Activo" : "Inactivo"}
-                >
-                  {tech.activo ? <ToggleRight size={26} color="#2A5A3E" /> : <ToggleLeft size={26} color="#B5401F" />}
-                </button>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <button
+                    onClick={() => updateTech(tech.id, { activo: !tech.activo })}
+                    style={{ border: "none", background: "transparent" }}
+                    title={tech.activo ? "Activo" : "Inactivo"}
+                  >
+                    {tech.activo ? <ToggleRight size={26} color="#2A5A3E" /> : <ToggleLeft size={26} color="#B5401F" />}
+                  </button>
+                  <button
+                    onClick={() => deleteTech(tech.id, tech.nombre)}
+                    style={{ border: "none", background: "transparent" }}
+                    title="Eliminar"
+                  >
+                    <Trash2 size={18} color="#B5401F" />
+                  </button>
+                </div>
               </div>
               <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
                 {["gratis", "profesional", "premium"].map((plan) => (

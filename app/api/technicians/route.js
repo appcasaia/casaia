@@ -94,3 +94,23 @@ export async function PATCH(req) {
     return Response.json({ error: "Error interno" }, { status: 500 });
   }
 }
+
+// Eliminar un técnico desde el panel admin.
+export async function DELETE(req) {
+  try {
+    const { key, id } = await req.json();
+    if (!process.env.ADMIN_SECRET || key !== process.env.ADMIN_SECRET) {
+      return Response.json({ error: "No autorizado" }, { status: 401 });
+    }
+    const technicians = await getTechnicians();
+    const filtered = technicians.filter((t) => t.id !== id);
+    if (filtered.length === technicians.length) {
+      return Response.json({ error: "No encontrado" }, { status: 404 });
+    }
+    await saveTechnicians(filtered);
+    return Response.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return Response.json({ error: "Error interno" }, { status: 500 });
+  }
+}
