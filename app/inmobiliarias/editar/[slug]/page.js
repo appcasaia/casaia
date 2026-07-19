@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Building2, Loader2, Plus, Trash2, Save, Check, KeyRound, AlertCircle, Sparkles } from "lucide-react";
 import { AGENCY_PLAN_LIMITS, PLAN_LABELS, estaBloqueadoPorPlan } from "../../../../lib/subscriptions";
+import { CATEGORIAS_TECNICO, emptyTecnicosPropiedad } from "../../../../lib/categorias";
 
 const smallInput = {
   padding: "8px 10px",
@@ -39,8 +40,20 @@ const dashedBtnStyle = {
   marginBottom: 20,
 };
 
-const emptyTecnico = () => ({ nombre: "", telefono: "", especialidad: "" });
-const emptyPropiedad = () => ({ nombre: "", direccion: "", wifi: "", claveDepto: "", clavePorton: "", notas: "" });
+const emptyTecnico = () => ({ nombre: "", telefono: "", especialidad: "", categoria: "general" });
+const emptyPropiedad = () => ({
+  nombre: "",
+  direccion: "",
+  wifiNombre: "",
+  wifi: "",
+  claveDepto: "",
+  clavePorton: "",
+  estacionamiento: "",
+  checkIn: "",
+  checkOut: "",
+  notas: "",
+  tecnicosPropiedad: emptyTecnicosPropiedad(),
+});
 
 export default function EditarInmobiliariaPage({ params, searchParams }) {
   const { slug } = params;
@@ -87,6 +100,14 @@ export default function EditarInmobiliariaPage({ params, searchParams }) {
 
   const updateProp = (i, field, value) =>
     setPropiedades((prev) => prev.map((p, idx) => (idx === i ? { ...p, [field]: value } : p)));
+  const updatePropTec = (i, categoria, field, value) =>
+    setPropiedades((prev) =>
+      prev.map((p, idx) =>
+        idx === i
+          ? { ...p, tecnicosPropiedad: { ...p.tecnicosPropiedad, [categoria]: { ...p.tecnicosPropiedad?.[categoria], [field]: value } } }
+          : p
+      )
+    );
   const propLimit = AGENCY_PLAN_LIMITS[agency?.plan || "gratis"]?.maxProperties ?? AGENCY_PLAN_LIMITS.gratis.maxProperties;
   const propCount = propiedades.filter((p) => p.nombre.trim()).length;
   const atLimit = propCount >= propLimit;
@@ -224,6 +245,17 @@ export default function EditarInmobiliariaPage({ params, searchParams }) {
                 <input style={smallInput} placeholder="Teléfono / Telefone" value={tec.telefono} onChange={(e) => updateTec(i, "telefono", e.target.value)} />
               </div>
               <input style={smallInput} placeholder="Especialidad / Especialidade" value={tec.especialidad} onChange={(e) => updateTec(i, "especialidad", e.target.value)} />
+              <select
+                style={{ ...smallInput, marginTop: 8 }}
+                value={tec.categoria || "general"}
+                onChange={(e) => updateTec(i, "categoria", e.target.value)}
+              >
+                {CATEGORIAS_TECNICO.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.label} / {c.labelPt}
+                  </option>
+                ))}
+              </select>
             </div>
           ))}
         </div>
@@ -271,12 +303,62 @@ export default function EditarInmobiliariaPage({ params, searchParams }) {
                 <input style={smallInput} placeholder="Nombre / Nome (ej/ex: Depto 203)" value={prop.nombre} onChange={(e) => updateProp(i, "nombre", e.target.value)} />
                 <input style={smallInput} placeholder="Dirección / Endereço" value={prop.direccion} onChange={(e) => updateProp(i, "direccion", e.target.value)} />
               </div>
+
+              <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#8A7A5C", textTransform: "uppercase", marginBottom: 4 }}>
+                Acceso / Acesso
+              </p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+                <input style={smallInput} placeholder="Nombre de red WiFi / Nome da rede WiFi" value={prop.wifiNombre || ""} onChange={(e) => updateProp(i, "wifiNombre", e.target.value)} />
                 <input style={smallInput} placeholder="Clave WiFi / Senha WiFi" value={prop.wifi} onChange={(e) => updateProp(i, "wifi", e.target.value)} />
-                <input style={smallInput} placeholder="Clave puerta / Senha porta" value={prop.claveDepto} onChange={(e) => updateProp(i, "claveDepto", e.target.value)} />
               </div>
-              <input style={{ ...smallInput, marginBottom: 8 }} placeholder="Clave portón / Senha portão" value={prop.clavePorton} onChange={(e) => updateProp(i, "clavePorton", e.target.value)} />
-              <input style={smallInput} placeholder="Otras notas / Outras observações" value={prop.notas} onChange={(e) => updateProp(i, "notas", e.target.value)} />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+                <input style={smallInput} placeholder="Clave puerta / Senha porta" value={prop.claveDepto} onChange={(e) => updateProp(i, "claveDepto", e.target.value)} />
+                <input style={smallInput} placeholder="Clave portón / Senha portão" value={prop.clavePorton} onChange={(e) => updateProp(i, "clavePorton", e.target.value)} />
+              </div>
+              <input style={{ ...smallInput, marginBottom: 8 }} placeholder="Estacionamiento / Estacionamento" value={prop.estacionamiento || ""} onChange={(e) => updateProp(i, "estacionamiento", e.target.value)} />
+
+              <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#8A7A5C", textTransform: "uppercase", marginBottom: 4, marginTop: 10 }}>
+                Estadía / Estadia
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+                <input style={smallInput} placeholder="Horario check-in / Horário check-in" value={prop.checkIn || ""} onChange={(e) => updateProp(i, "checkIn", e.target.value)} />
+                <input style={smallInput} placeholder="Horario check-out / Horário check-out" value={prop.checkOut || ""} onChange={(e) => updateProp(i, "checkOut", e.target.value)} />
+              </div>
+
+              <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#8A7A5C", textTransform: "uppercase", marginBottom: 4, marginTop: 10 }}>
+                Información para el huésped / Informação para o hóspede
+              </p>
+              <textarea
+                style={{ ...smallInput, minHeight: 80, resize: "vertical", fontFamily: "Inter, sans-serif" }}
+                placeholder="Uso de A/C, agua caliente, TV, llaves y controles, residuos, normas de convivencia, etc."
+                value={prop.notas}
+                onChange={(e) => updateProp(i, "notas", e.target.value)}
+              />
+
+              <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#8A7A5C", textTransform: "uppercase", marginBottom: 4, marginTop: 10 }}>
+                Técnicos específicos de esta propiedad (opcional) / Técnicos específicos desta propriedade
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {CATEGORIAS_TECNICO.map((c) => (
+                  <div key={c.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr 1fr", gap: 6, alignItems: "center" }}>
+                    <span style={{ fontFamily: "Inter, sans-serif", fontSize: 11, color: "#5B7065", minWidth: 90 }}>
+                      {c.label}
+                    </span>
+                    <input
+                      style={smallInput}
+                      placeholder="Nombre / Nome"
+                      value={prop.tecnicosPropiedad?.[c.id]?.nombre || ""}
+                      onChange={(e) => updatePropTec(i, c.id, "nombre", e.target.value)}
+                    />
+                    <input
+                      style={smallInput}
+                      placeholder="Teléfono / Telefone"
+                      value={prop.tecnicosPropiedad?.[c.id]?.telefono || ""}
+                      onChange={(e) => updatePropTec(i, c.id, "telefono", e.target.value)}
+                    />
+                  </div>
+                ))}
+              </div>
               {prop.slug && (
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, paddingTop: 10, borderTop: "1px solid #F0EAD9" }}>
                   <img

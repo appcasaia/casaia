@@ -6,6 +6,7 @@ import { findAgencyBySlug } from "../../../lib/agencies";
 import { checkRateLimit, getClientIp } from "../../../lib/rateLimit";
 import { verifyTurnstile } from "../../../lib/turnstile";
 import { TECHNICIAN_PLAN_LIMITS } from "../../../lib/subscriptions";
+import { labelCategoria } from "../../../lib/categorias";
 
 export async function POST(req) {
   try {
@@ -17,7 +18,7 @@ export async function POST(req) {
       );
     }
 
-    const { name, phone, zone, summary, agencySlug, propertyName, priority, emergency, turnstileToken } = await req.json();
+    const { name, phone, zone, summary, agencySlug, propertyName, priority, categoria, emergency, turnstileToken } = await req.json();
 
     const humanOk = await verifyTurnstile(turnstileToken, getClientIp(req));
     if (!humanOk) {
@@ -42,17 +43,42 @@ export async function POST(req) {
     let agency = null;
 
     if (agencySlug) {
-      // Consulta llegada por el link exclusivo de una inmobiliaria:
-      // se deriva ÚNICAMENTE a los técnicos de confianza de esa inmobiliaria.
+      // Consulta llegada por el link exclusivo de una inmobiliaria.
       agency = await findAgencyBySlug(agencySlug);
-      if (agency && agency.tecnicos?.length) {
-        matches = agency.tecnicos.map((t) => ({
-          nombre: t.nombre,
-          telefono: t.telefono,
-          email: t.email || null,
-          direccion: null,
-        }));
-        sourceLabel = `inmobiliaria ${agency.nombre}`;
+      if (agency) {
+        const catKey = categoria && categoria !== "general" ? categoria : null;
+        const propiedad = propertyName
+          ? agency.propiedades?.find((p) => p.nombre === propertyName)
+          : agency.propiedades?.length === 1
+          ? agency.propiedades[0]
+          : null;
+
+        // 1) Técnico específico de ESTA propiedad para la categoría del problema.
+        const tecPropiedad = catKey ? propiedad?.tecnicosPropiedad?.[catKey] : null;
+        if (tecPropiedad?.nombre && tecPropiedad?.telefono) {
+          matches = [
+            {
+              nombre: tecPropiedad.nombre,
+              telefono: tecPropiedad.telefono,
+              email: null,
+              direccion: null,
+              deLaPropiedad: true,
+            },
+          ];
+          sourceLabel = `técnico de la propiedad (${labelCategoria(catKey)})`;
+        } else if (agency.tecnicos?.length) {
+          // 2) Técnicos generales de la inmobiliaria: priorizamos los que coinciden
+          // con la categoría del problema; si ninguno coincide, van todos.
+          const porCategoria = catKey ? agency.tecnicos.filter((t) => t.categoria === catKey) : [];
+          const listaFinal = porCategoria.length ? porCategoria : agency.tecnicos;
+          matches = listaFinal.map((t) => ({
+            nombre: t.nombre,
+            telefono: t.telefono,
+            email: t.email || null,
+            direccion: null,
+          }));
+          sourceLabel = porCategoria.length ? `técnico de confianza (${labelCategoria(catKey)})` : `inmobiliaria ${agency.nombre}`;
+        }
       }
     } else {
       // Consulta normal: primero técnicos auto-registrados de la zona,

@@ -296,25 +296,36 @@ function parseRequiereVisita(rawText) {
   const lines = rawText.trim().split("\n");
   let requiereVisita = false;
   let priority = null;
+  let categoria = null;
+  let propiedadIdentificada = null;
   let contentLines = [...lines];
 
-  // Busca las últimas 1-2 líneas de marcadores (PRIORIDAD y REQUIERE_VISITA)
+  // Busca las últimas líneas de marcadores (PRIORIDAD, REQUIERE_VISITA, CATEGORIA, PROPIEDAD)
   while (contentLines.length > 0) {
     const last = contentLines[contentLines.length - 1].trim();
     const priorityMatch = last.match(/^PRIORIDAD:\s*(ALTA|MEDIA|BAJA)$/i);
     const visitaMatch = last.match(/^REQUIERE_VISITA:\s*(SI|NO)$/i);
+    const categoriaMatch = last.match(/^CATEGORIA:\s*(PLOMERIA|ELECTRICIDAD|CERRAJERIA|AIRE_ACONDICIONADO|GENERAL)$/i);
+    const propiedadMatch = last.match(/^PROPIEDAD:\s*(.+)$/i);
     if (priorityMatch) {
       priority = priorityMatch[1].toUpperCase();
       contentLines = contentLines.slice(0, -1);
     } else if (visitaMatch) {
       requiereVisita = visitaMatch[1].toUpperCase() === "SI";
       contentLines = contentLines.slice(0, -1);
+    } else if (categoriaMatch) {
+      categoria = categoriaMatch[1].toLowerCase();
+      contentLines = contentLines.slice(0, -1);
+    } else if (propiedadMatch) {
+      const val = propiedadMatch[1].trim();
+      propiedadIdentificada = val.toUpperCase() === "NINGUNA" ? null : val;
+      contentLines = contentLines.slice(0, -1);
     } else {
       break;
     }
   }
 
-  return { text: contentLines.join("\n").trim(), requiereVisita, priority };
+  return { text: contentLines.join("\n").trim(), requiereVisita, priority, categoria, propiedadIdentificada };
 }
 
 const LogoMark = ({ size = 24 }) => (
@@ -343,6 +354,8 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
   const [leadResult, setLeadResult] = useState(null); // { referral: {...} | null }
   const [emergencyMode, setEmergencyMode] = useState(false);
   const [casePriority, setCasePriority] = useState(null); // ALTA | MEDIA | BAJA | null
+  const [caseCategoria, setCaseCategoria] = useState(null); // plomeria | electricidad | cerrajeria | aire_acondicionado | general | null
+  const [casePropiedad, setCasePropiedad] = useState(null); // nombre de propiedad identificada por la IA, si hay varias
   const [turnstileToken, setTurnstileToken] = useState(null);
   const [lead, setLead] = useState({ name: "", phone: "", zone: "" });
   const [sendingLead, setSendingLead] = useState(false);
@@ -587,11 +600,13 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
       if (!response.ok) throw new Error(data.error || "Error de conexión");
       if (data.error) throw new Error(data.error);
 
-      const { text: cleanText, requiereVisita, priority } = parseRequiereVisita(data.text || "");
+      const { text: cleanText, requiereVisita, priority, categoria, propiedadIdentificada } = parseRequiereVisita(data.text || "");
       const withAssistant = [...nextHistory, { role: "assistant", text: cleanText }];
       setMessages(withAssistant);
       persistConversation(withAssistant);
       if (priority) setCasePriority(priority);
+      if (categoria) setCaseCategoria(categoria);
+      if (propiedadIdentificada) setCasePropiedad(propiedadIdentificada);
       if (requiereVisita) setShowLeadForm(true);
     } catch (e) {
       setError(e.message || t.connectionError);
@@ -634,8 +649,14 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
           ...lead,
           summary,
           agencySlug,
-          propertyName: agencyProperties?.length === 1 ? agencyProperties[0].nombre : null,
+          propertyName:
+            agencyProperties?.length === 1
+              ? agencyProperties[0].nombre
+              : agencyProperties?.length > 1
+              ? casePropiedad
+              : null,
           priority: casePriority,
+          categoria: caseCategoria,
           emergency: emergencyMode,
           turnstileToken,
         }),
@@ -1190,6 +1211,23 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                           <div style={{ fontFamily: "'Roboto Slab', serif", fontSize: 22, fontWeight: 700, color: "#F3EDE2" }}>
                             {ref.nombre}
                           </div>
+                          {ref.deLaPropiedad && (
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 4,
+                                padding: "3px 10px",
+                                borderRadius: 999,
+                                background: "#C4622A",
+                              }}
+                            >
+                              <BadgeCheck size={13} color="#FFFFFF" />
+                              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#FFFFFF", textTransform: "uppercase" }}>
+                                Técnico de tu propiedad
+                              </span>
+                            </div>
+                          )}
                           {ref.verificado && (
                             <div
                               style={{

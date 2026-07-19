@@ -21,10 +21,19 @@ Reglas:
    - ALTA: fuga de gas u olor a gas, falta total de energía eléctrica, inundación o entrada de agua activa, cerradura que dejó a alguien encerrado o afuera, riesgo de incendio, cualquier cosa que sea peligrosa si se deja sin atender ya mismo.
    - MEDIA: aire acondicionado o calefacción que no funciona, pérdidas de agua menores, electrodomésticos rotos, problemas que molestan pero no son peligrosos.
    - BAJA: consultas simples, lámparas, controles remotos, dudas de uso, cosas cosméticas.
-9. IMPORTANTE: terminá SIEMPRE tu respuesta con DOS líneas aparte, exactamente en este formato, sin nada más en esas líneas, sin importar en qué idioma esté respondiendo:
+8b. CLASIFICACIÓN DE CATEGORÍA: clasificá también el tipo de problema, para que el sistema pueda derivar al técnico específico correcto:
+   - PLOMERIA: canillas, pérdidas de agua, inodoros, termotanques, cañerías.
+   - ELECTRICIDAD: tomas, disyuntores, tableros, cableado, cortes de luz (no relacionados a electrodomésticos específicos).
+   - CERRAJERIA: cerraduras, llaves, quedar encerrado o afuera.
+   - AIRE_ACONDICIONADO: aire acondicionado, climatización, calefacción por equipos (no calderas de gas).
+   - GENERAL: cualquier otra cosa (electrodomésticos, humedad, aberturas, mantenimiento general, o cuando no está claro).
+9. IMPORTANTE: terminá SIEMPRE tu respuesta con las líneas aparte que correspondan, exactamente en este formato, sin nada más en esas líneas, sin importar en qué idioma esté respondiendo:
 REQUIERE_VISITA: SI
 PRIORIDAD: ALTA
-(o los valores que correspondan: REQUIERE_VISITA es SI o NO; PRIORIDAD es ALTA, MEDIA o BAJA)
+CATEGORIA: PLOMERIA
+PROPIEDAD: NINGUNA
+(REQUIERE_VISITA es SI o NO; PRIORIDAD es ALTA, MEDIA o BAJA; CATEGORIA es PLOMERIA, ELECTRICIDAD, CERRAJERIA, AIRE_ACONDICIONADO o GENERAL)
+Para la línea PROPIEDAD: si hay más de una propiedad cargada (ver más abajo) y el huésped ya identificó en cuál está, poné el nombre EXACTO de esa propiedad tal como está cargado. Si hay una sola propiedad cargada, o ninguna, o el huésped todavía no dijo en cuál está, poné NINGUNA.
 Poné REQUIERE_VISITA: SI cuando el caso necesita intervención de un profesional matriculado (gas, electricidad de riesgo, fugas, reemplazo de componentes, instalación). Poné NO cuando es algo que la persona puede resolver sola o cuando todavía falta información y le estás preguntando algo.`;
 
 const LANG_INSTRUCTION = {
@@ -51,10 +60,14 @@ function buildSystemPrompt(lang, emergency, properties) {
       .map((p, i) => {
         const parts = [`Propiedad ${i + 1}: "${p.nombre}"`];
         if (p.direccion) parts.push(`Dirección/condominio: ${p.direccion}`);
+        if (p.wifiNombre) parts.push(`Nombre de red WiFi: ${p.wifiNombre}`);
         if (p.wifi) parts.push(`Clave WiFi: ${p.wifi}`);
         if (p.claveDepto) parts.push(`Clave puerta del departamento: ${p.claveDepto}`);
         if (p.clavePorton) parts.push(`Clave portón/acceso al edificio: ${p.clavePorton}`);
-        if (p.notas) parts.push(`Notas: ${p.notas}`);
+        if (p.estacionamiento) parts.push(`Estacionamiento: ${p.estacionamiento}`);
+        if (p.checkIn) parts.push(`Horario de check-in: ${p.checkIn}`);
+        if (p.checkOut) parts.push(`Horario de check-out: ${p.checkOut}`);
+        if (p.notas) parts.push(`Información útil para el huésped: ${p.notas}`);
         return parts.join(" | ");
       })
       .join("\n");
@@ -63,7 +76,7 @@ function buildSystemPrompt(lang, emergency, properties) {
 ${list}
 
 Reglas para usar estos datos:
-- Si el usuario pregunta algo práctico que esta información responde (WiFi, cómo entrar, claves de acceso, dirección), respondé directo con el dato exacto, sin dar vueltas.
+- Si el usuario pregunta algo práctico que esta información responde (WiFi, cómo entrar, claves de acceso, dirección, estacionamiento, horarios de check-in/check-out), respondé directo con el dato exacto, sin dar vueltas.
 ${
   properties.length > 1
     ? '- Como hay más de una propiedad cargada, si no sabés en cuál está el huésped, preguntale primero "¿en qué unidad/departamento estás?" antes de dar cualquier clave, y usá el nombre de la propiedad para identificarla.'
