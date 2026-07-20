@@ -7,6 +7,7 @@ import { checkRateLimit, getClientIp } from "../../../lib/rateLimit";
 import { verifyTurnstile } from "../../../lib/turnstile";
 import { TECHNICIAN_PLAN_LIMITS } from "../../../lib/subscriptions";
 import { labelCategoria } from "../../../lib/categorias";
+import { sendWhatsAppTemplate } from "../../../lib/whatsapp";
 
 export async function POST(req) {
   try {
@@ -151,6 +152,28 @@ export async function POST(req) {
         to: agency.email,
         subject: `🚨 URGENTE en tu propiedad — CasaIA: ${name}`,
         text: `Se registró un caso URGENTE en una de tus propiedades gestionadas por CasaIA.\n\n${emailBody}`,
+      });
+    }
+
+    // Avisos por WhatsApp (Meta Cloud API). No hace nada mientras no esté
+    // configurado (ver lib/whatsapp.js) — el email sigue siendo el respaldo.
+    const resumenCorto = (summary || "").slice(0, 300);
+    for (const m of matches) {
+      if (m.telefono) {
+        await sendWhatsAppTemplate({
+          to: m.telefono,
+          templateName: "nuevo_lead_casaia",
+          languageCode: "es",
+          variables: [priority || "MEDIA", name, phone, propertyName || zone || "-", resumenCorto],
+        });
+      }
+    }
+    if (isUrgent && agency && agency.telefono) {
+      await sendWhatsAppTemplate({
+        to: agency.telefono,
+        templateName: "nuevo_lead_casaia",
+        languageCode: "es",
+        variables: ["ALTA", name, phone, propertyName || zone || "-", resumenCorto],
       });
     }
 
