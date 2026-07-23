@@ -58,6 +58,7 @@ const T = {
     bizTechBtn: "Soy técnico / empresa",
     bizAgencyBtn: "Soy inmobiliaria / administrador",
     bizComercioBtn: "Soy un comercio",
+    bizTitle: "Registrate acá",
     emergencyHint: "Solo para emergencias reales — gas, agua, electricidad o encierro",
     supportLabel: "Soporte técnico de la app",
     emergencyBtn: "Emergencia",
@@ -98,6 +99,7 @@ const T = {
     bizTechBtn: "Sou técnico / empresa",
     bizAgencyBtn: "Sou imobiliária / administrador",
     bizComercioBtn: "Sou um comércio",
+    bizTitle: "Cadastre-se aqui",
     emergencyHint: "Apenas para emergências reais — gás, água, elétrica ou trancado(a)",
     supportLabel: "Suporte técnico do app",
     emergencyBtn: "Emergência",
@@ -138,6 +140,7 @@ const T = {
     bizTechBtn: "I'm a technician / business",
     bizAgencyBtn: "I'm a real estate agency / manager",
     bizComercioBtn: "I'm a local business",
+    bizTitle: "Register here",
     emergencyHint: "Only for real emergencies — gas, water, electrical, or locked out",
     supportLabel: "App technical support",
     emergencyBtn: "Emergency",
@@ -178,6 +181,7 @@ const T = {
     bizTechBtn: "Je suis technicien / entreprise",
     bizAgencyBtn: "Je suis agence immobilière / gestionnaire",
     bizComercioBtn: "Je suis un commerce local",
+    bizTitle: "Inscrivez-vous ici",
     emergencyHint: "Uniquement pour les urgences réelles — gaz, eau, électricité ou porte bloquée",
     supportLabel: "Support technique de l'application",
     emergencyBtn: "Urgence",
@@ -218,6 +222,7 @@ const T = {
     bizTechBtn: "Ich bin Techniker / Unternehmen",
     bizAgencyBtn: "Ich bin Immobilienverwaltung",
     bizComercioBtn: "Ich bin ein lokales Geschäft",
+    bizTitle: "Hier registrieren",
     emergencyHint: "Nur für echte Notfälle — Gas, Wasser, Strom oder ausgesperrt",
     supportLabel: "Technischer Support der App",
     emergencyBtn: "Notfall",
@@ -1012,37 +1017,62 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
           <div style={{ width: "100%", maxWidth: 640 }}>{composer}</div>
 
           {!agencySlug && (
-            <div style={{ display: "flex", gap: 10, marginTop: 28, flexWrap: "wrap", justifyContent: "center" }}>
-              <a
-                href="/tecnicos/registro"
+            <div
+              style={{
+                marginTop: 28,
+                padding: "16px 20px 20px",
+                borderRadius: 16,
+                border: "1px solid #E0D8C7",
+                background: "rgba(255,255,255,0.4)",
+                maxWidth: 640,
+                width: "100%",
+              }}
+            >
+              <p
                 style={{
-                  display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 999,
-                  border: "1px solid #C4B896", background: "transparent", color: "#5B7065",
-                  fontFamily: "Inter, sans-serif", fontSize: 12.5, fontWeight: 600, textDecoration: "none",
+                  margin: "0 0 12px",
+                  textAlign: "center",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 11.5,
+                  letterSpacing: 0.5,
+                  textTransform: "uppercase",
+                  color: "#8A7A5C",
                 }}
               >
-                <Wrench size={13} /> {t.bizTechBtn}
-              </a>
-              <a
-                href="/inmobiliarias/registro"
-                style={{
-                  display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 999,
-                  border: "1px solid #C4B896", background: "transparent", color: "#5B7065",
-                  fontFamily: "Inter, sans-serif", fontSize: 12.5, fontWeight: 600, textDecoration: "none",
-                }}
-              >
-                <Building2 size={13} /> {t.bizAgencyBtn}
-              </a>
-              <a
-                href="/comercios/registro"
-                style={{
-                  display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 999,
-                  border: "1px solid #C4B896", background: "transparent", color: "#5B7065",
-                  fontFamily: "Inter, sans-serif", fontSize: 12.5, fontWeight: 600, textDecoration: "none",
-                }}
-              >
-                <Store size={13} /> {t.bizComercioBtn}
-              </a>
+                {t.bizTitle}
+              </p>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
+                <a
+                  href="/tecnicos/registro"
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 999,
+                    border: "1px solid #C4B896", background: "transparent", color: "#5B7065",
+                    fontFamily: "Inter, sans-serif", fontSize: 12.5, fontWeight: 600, textDecoration: "none",
+                  }}
+                >
+                  <Wrench size={13} /> {t.bizTechBtn}
+                </a>
+                <a
+                  href="/inmobiliarias/registro"
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 999,
+                    border: "1px solid #C4B896", background: "transparent", color: "#5B7065",
+                    fontFamily: "Inter, sans-serif", fontSize: 12.5, fontWeight: 600, textDecoration: "none",
+                  }}
+                >
+                  <Building2 size={13} /> {t.bizAgencyBtn}
+                </a>
+                <a
+                  href="/comercios/registro"
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 999,
+                    border: "1px solid #C4B896", background: "transparent", color: "#5B7065",
+                    fontFamily: "Inter, sans-serif", fontSize: 12.5, fontWeight: 600, textDecoration: "none",
+                  }}
+                >
+                  <Store size={13} /> {t.bizComercioBtn}
+                </a>
+              </div>
             </div>
           )}
 
