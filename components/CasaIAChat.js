@@ -21,6 +21,7 @@ import {
   ChevronDown,
   Siren,
   BadgeCheck,
+  Store,
 } from "lucide-react";
 
 const T = {
@@ -56,6 +57,7 @@ const T = {
     historyToday: "Hoy",
     bizTechBtn: "Soy técnico / empresa",
     bizAgencyBtn: "Soy inmobiliaria / administrador",
+    bizComercioBtn: "Soy un comercio",
     emergencyHint: "Solo para emergencias reales — gas, agua, electricidad o encierro",
     supportLabel: "Soporte técnico de la app",
     emergencyBtn: "Emergencia",
@@ -95,6 +97,7 @@ const T = {
     historyToday: "Hoje",
     bizTechBtn: "Sou técnico / empresa",
     bizAgencyBtn: "Sou imobiliária / administrador",
+    bizComercioBtn: "Sou um comércio",
     emergencyHint: "Apenas para emergências reais — gás, água, elétrica ou trancado(a)",
     supportLabel: "Suporte técnico do app",
     emergencyBtn: "Emergência",
@@ -134,6 +137,7 @@ const T = {
     historyToday: "Today",
     bizTechBtn: "I'm a technician / business",
     bizAgencyBtn: "I'm a real estate agency / manager",
+    bizComercioBtn: "I'm a local business",
     emergencyHint: "Only for real emergencies — gas, water, electrical, or locked out",
     supportLabel: "App technical support",
     emergencyBtn: "Emergency",
@@ -173,6 +177,7 @@ const T = {
     historyToday: "Aujourd'hui",
     bizTechBtn: "Je suis technicien / entreprise",
     bizAgencyBtn: "Je suis agence immobilière / gestionnaire",
+    bizComercioBtn: "Je suis un commerce local",
     emergencyHint: "Uniquement pour les urgences réelles — gaz, eau, électricité ou porte bloquée",
     supportLabel: "Support technique de l'application",
     emergencyBtn: "Urgence",
@@ -212,6 +217,7 @@ const T = {
     historyToday: "Heute",
     bizTechBtn: "Ich bin Techniker / Unternehmen",
     bizAgencyBtn: "Ich bin Immobilienverwaltung",
+    bizComercioBtn: "Ich bin ein lokales Geschäft",
     emergencyHint: "Nur für echte Notfälle — Gas, Wasser, Strom oder ausgesperrt",
     supportLabel: "Technischer Support der App",
     emergencyBtn: "Notfall",
@@ -1026,6 +1032,16 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                 }}
               >
                 <Building2 size={13} /> {t.bizAgencyBtn}
+              </a>
+              <a
+                href="/comercios/registro"
+                style={{
+                  display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 999,
+                  border: "1px solid #C4B896", background: "transparent", color: "#5B7065",
+                  fontFamily: "Inter, sans-serif", fontSize: 12.5, fontWeight: 600, textDecoration: "none",
+                }}
+              >
+                <Store size={13} /> {t.bizComercioBtn}
               </a>
             </div>
           )}
