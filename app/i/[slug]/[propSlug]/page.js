@@ -51,6 +51,7 @@ export default function PropertyLandingPage({ params }) {
       agencyName={`${agency.nombre} — ${property.nombre}`}
       agencyTecnicos={agency.tecnicos}
       agencyProperties={[property]}
+      agencyLocalidades={agency.localidades}
     />
   );
 }

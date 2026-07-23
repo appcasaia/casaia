@@ -341,7 +341,7 @@ const LogoMark = ({ size = 24 }) => (
   </svg>
 );
 
-export default function CasaIAChat({ agencySlug = null, agencyName = null, agencyTecnicos = null, agencyProperties = null }) {
+export default function CasaIAChat({ agencySlug = null, agencyName = null, agencyTecnicos = null, agencyProperties = null, agencyLocalidades = null }) {
   const [lang, setLang] = useState("es");
   const t = T[lang];
   const [messages, setMessages] = useState([]);
@@ -590,10 +590,27 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
 
     try {
       const apiMessages = buildApiMessages(messages, text, usedImage);
+
+      // Para recomendar comercios, mandamos las dos señales de zona que tenemos:
+      // la propiedad puntual (más precisa, pero puede no mencionar el barrio si
+      // la dirección es solo calle y número) y la localidad general de la
+      // inmobiliaria (menos precisa, pero más confiable como respaldo).
+      const propiedadActual =
+        agencyProperties?.length === 1
+          ? agencyProperties[0]
+          : agencyProperties?.find((p) => p.nombre === casePropiedad) || null;
+
       const response = await fetch("/api/diagnostico", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages, lang, emergency: emergencyMode, properties: agencyProperties }),
+        body: JSON.stringify({
+          messages: apiMessages,
+          lang,
+          emergency: emergencyMode,
+          properties: agencyProperties,
+          zonaPropiedad: propiedadActual?.direccion || null,
+          zonaAgencia: agencyLocalidades || null,
+        }),
       });
 
       const data = await response.json().catch(() => ({}));

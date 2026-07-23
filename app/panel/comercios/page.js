@@ -1,0 +1,217 @@
+"use client";
+
+import React, { useState } from "react";
+import { Lock, Loader2, Store, ToggleLeft, ToggleRight, Trash2, LockOpen } from "lucide-react";
+import { CATEGORIAS_COMERCIO, labelCategoriaComercio } from "../../../lib/categorias";
+
+const PLAN_COLORS = { gratis: "#8A7A5C", premium: "#C4622A" };
+
+export default function ComerciosPanelPage() {
+  const [key, setKey] = useState("");
+  const [unlocked, setUnlocked] = useState(false);
+  const [comercios, setComercios] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const load = async () => {
+    if (!key.trim()) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/comercios?key=${encodeURIComponent(key.trim())}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Error al cargar");
+      setComercios(json.comercios.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      setUnlocked(true);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateComercio = async (id, updates) => {
+    const res = await fetch("/api/comercios", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: key.trim(), id, updates }),
+    });
+    if (res.ok) {
+      setComercios((prev) =>
+        prev.map((c) => {
+          if (c.id !== id) return c;
+          const merged = { ...c, ...updates };
+          if (updates.planesHabilitados) {
+            merged.planesHabilitados = { ...c.planesHabilitados, ...updates.planesHabilitados };
+            if (merged.planesHabilitados[c.plan] === false) {
+              merged.plan = "gratis";
+            }
+          }
+          return merged;
+        })
+      );
+    }
+  };
+
+  const togglePlanHabilitado = async (comercio, plan) => {
+    const actual = comercio.planesHabilitados?.[plan] !== false;
+    if (plan === "gratis") return; // nunca se puede tocar
+    await updateComercio(comercio.id, { planesHabilitados: { [plan]: !actual } });
+  };
+
+  const deleteComercio = async (id, nombre) => {
+    if (!window.confirm(`¿Eliminar "${nombre}" de la lista de comercios? Esta acción no se puede deshacer.`)) return;
+    const res = await fetch("/api/comercios", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: key.trim(), id }),
+    });
+    if (res.ok) {
+      setComercios((prev) => prev.filter((c) => c.id !== id));
+    }
+  };
+
+  if (!unlocked) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#F3EDE2", padding: "40px 20px" }}>
+        <div style={{ maxWidth: 420, margin: "0 auto" }}>
+          <h1 style={{ fontFamily: "'Roboto Slab', serif", color: "#1F2D2B", fontSize: 22 }}>CasaIA — Comercios</h1>
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#8A7A5C", marginBottom: 20 }}>
+            Ingresá tu clave de administrador.
+          </p>
+          <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ position: "relative", flex: 1 }}>
+              <Lock size={14} color="#8A7A5C" style={{ position: "absolute", left: 12, top: 12 }} />
+              <input
+                type="password"
+                value={key}
+                onChange={(e) => setKey(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && load()}
+                style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px 10px 34px", borderRadius: 10, border: "1px solid #E0D8C7", fontFamily: "Inter, sans-serif", fontSize: 14, outline: "none" }}
+                placeholder="Clave de administrador"
+              />
+            </div>
+            <button onClick={load} disabled={loading || !key.trim()} style={{ padding: "0 18px", borderRadius: 10, border: "none", background: "#C4622A", color: "#FFFFFF", fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: 14, opacity: loading || !key.trim() ? 0.5 : 1 }}>
+              {loading ? <Loader2 size={16} className="spin" /> : "Entrar"}
+            </button>
+          </div>
+          {error && <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#B5401F", marginTop: 12 }}>{error}</p>}
+        </div>
+        <style>{`.spin { animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#F3EDE2", padding: "40px 20px" }}>
+      <div style={{ maxWidth: 800, margin: "0 auto" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+          <Store size={20} color="#C4622A" />
+          <h1 style={{ fontFamily: "'Roboto Slab', serif", color: "#1F2D2B", fontSize: 22, margin: 0 }}>
+            Comercios registrados ({comercios.length})
+          </h1>
+        </div>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#8A7A5C", marginBottom: 20 }}>
+          Podés activar/desactivar cada uno, o habilitarle el plan Premium para que la IA lo recomiende primero.
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {comercios.map((c) => (
+            <div key={c.id} style={{ background: "#FFFFFF", border: "1px solid #E9E2D2", borderRadius: 12, padding: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: 15, color: "#1F2D2B" }}>
+                    {c.nombre}
+                  </div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "#8A7A5C", marginTop: 2 }}>
+                    {labelCategoriaComercio(c.categoria)} · {c.telefono} · {c.email || "sin email"}
+                  </div>
+                  <div style={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: "#5B7065", marginTop: 6 }}>
+                    Zonas: {(c.zonas || []).join(", ") || "-"}
+                  </div>
+                  {c.direccion && (
+                    <div style={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: "#5B7065" }}>
+                      Dirección: {c.direccion}
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <button
+                    onClick={() => updateComercio(c.id, { activo: !c.activo })}
+                    style={{ border: "none", background: "transparent" }}
+                    title={c.activo ? "Activo" : "Inactivo"}
+                  >
+                    {c.activo ? <ToggleRight size={26} color="#2A5A3E" /> : <ToggleLeft size={26} color="#B5401F" />}
+                  </button>
+                  <button
+                    onClick={() => deleteComercio(c.id, c.nombre)}
+                    style={{ border: "none", background: "transparent" }}
+                    title="Eliminar"
+                  >
+                    <Trash2 size={18} color="#B5401F" />
+                  </button>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 6, marginTop: 10, alignItems: "center", flexWrap: "wrap" }}>
+                {["gratis", "premium"].map((plan) => {
+                  const habilitado = plan === "gratis" || c.planesHabilitados?.[plan] !== false;
+                  return (
+                    <div key={plan} style={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <button
+                        onClick={() => habilitado && updateComercio(c.id, { plan })}
+                        disabled={!habilitado}
+                        title={!habilitado ? "Plan deshabilitado para este comercio" : undefined}
+                        style={{
+                          padding: "4px 10px",
+                          borderRadius: "999px 0 0 999px",
+                          border: `1px solid ${c.plan === plan ? PLAN_COLORS[plan] : "#E0D8C7"}`,
+                          borderRight: "none",
+                          background: c.plan === plan ? PLAN_COLORS[plan] : "transparent",
+                          color: c.plan === plan ? "#FFFFFF" : "#8A7A5C",
+                          fontFamily: "'IBM Plex Mono', monospace",
+                          fontSize: 10,
+                          textTransform: "uppercase",
+                          opacity: habilitado ? 1 : 0.35,
+                          cursor: habilitado ? "pointer" : "not-allowed",
+                        }}
+                      >
+                        {plan}
+                      </button>
+                      <button
+                        onClick={() => togglePlanHabilitado(c, plan)}
+                        disabled={plan === "gratis"}
+                        title={plan === "gratis" ? "Siempre disponible" : habilitado ? "Deshabilitar este plan" : "Habilitar este plan"}
+                        style={{
+                          padding: "4px 6px",
+                          borderRadius: "0 999px 999px 0",
+                          border: `1px solid ${c.plan === plan ? PLAN_COLORS[plan] : "#E0D8C7"}`,
+                          background: c.plan === plan ? PLAN_COLORS[plan] : "transparent",
+                          opacity: plan === "gratis" ? 0.3 : 1,
+                          cursor: plan === "gratis" ? "default" : "pointer",
+                        }}
+                      >
+                        {habilitado ? (
+                          <LockOpen size={10} color={c.plan === plan ? "#FFFFFF" : "#5B7065"} />
+                        ) : (
+                          <Lock size={10} color={c.plan === plan ? "#FFFFFF" : "#B5401F"} />
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+                {c.subscription && (
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#8A7A5C", marginLeft: 4 }}>
+                    de alta desde {new Date(c.subscription.startDate).toLocaleDateString("es-AR")}
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+          {comercios.length === 0 && (
+            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#8A7A5C" }}>Todavía no hay comercios registrados.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

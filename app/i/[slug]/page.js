@@ -47,6 +47,7 @@ export default function AgencyLandingPage({ params }) {
       agencyName={agency.nombre}
       agencyTecnicos={agency.tecnicos}
       agencyProperties={agency.propiedades}
+      agencyLocalidades={agency.localidades}
     />
   );
 }

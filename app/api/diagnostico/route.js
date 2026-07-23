@@ -1,5 +1,7 @@
 import { incrMetric } from "../../../lib/metrics";
 import { checkRateLimit } from "../../../lib/rateLimit";
+import { getComercios, findComerciosForZone } from "../../../lib/comercios";
+import { labelCategoriaComercio } from "../../../lib/categorias";
 
 const BASE_SYSTEM_PROMPT = `Sos "CasaIA", un asistente experto en el hogar que ayuda a la gente a entender qué le pasa a algo en su casa y qué hacer al respecto. Cubrís un rango amplio de problemas domésticos: calefacción central (piso radiante, radiadores, fancoil, calderas murales a gas), plomería y sanitarios (canillas, pérdidas, inodoros, termotanques), electricidad básica (lámparas, tomas, disyuntores, tableros), electrodomésticos, humedad y filtraciones, aberturas, y en general cualquier cosa que se rompe o falla en una casa. En calefacción y gas tenés especialización de nivel técnico senior (15+ años de experiencia equivalente, normativa IRAM/ENARGAS/NAG en Argentina y estándares equivalentes en Brasil); en el resto de las áreas tenés buen criterio general de "manitas experto" que sabe cuándo algo es simple y cuándo hace falta un profesional matriculado.
 
@@ -44,7 +46,7 @@ const LANG_INSTRUCTION = {
   de: "Antworten Sie immer auf Deutsch, in einem natürlichen und direkten Ton, wie eine vertrauenswürdige Person, die mit Ihnen spricht — nicht zu förmlich.",
 };
 
-function buildSystemPrompt(lang, emergency, properties) {
+function buildSystemPrompt(lang, emergency, properties, comercios) {
   const instruction = LANG_INSTRUCTION[lang] || LANG_INSTRUCTION.es;
   const emergencyBlock = emergency
     ? `\n\nMODO EMERGENCIA ACTIVADO: el usuario tocó el botón de emergencia porque siente que la situación es urgente. Priorizá por sobre todo lo demás:
@@ -86,7 +88,29 @@ ${
 - Esta información es sensible: solo la usás para responder al huésped en esta conversación, nunca la repitas fuera de contexto ni la mezcles entre propiedades distintas.`;
   }
 
-  return `${BASE_SYSTEM_PROMPT}\n\n${instruction}${emergencyBlock}${propertiesBlock}`;
+  let comerciosBlock = "";
+  if (comercios && comercios.length > 0) {
+    const list = comercios
+      .map((c) => {
+        const parts = [`${c.nombre} (${labelCategoriaComercio(c.categoria)})`];
+        if (c.direccion) parts.push(`dirección: ${c.direccion}`);
+        if (c.telefono) parts.push(`teléfono/WhatsApp: ${c.telefono}`);
+        if (c.horarios) parts.push(`horario: ${c.horarios}`);
+        if (c.descripcion) parts.push(c.descripcion);
+        return "- " + parts.join(" | ");
+      })
+      .join("\n");
+
+    comerciosBlock = `\n\nCOMERCIOS RECOMENDADOS EN LA ZONA — reales, cargados por comercios registrados en CasaIA (vienen ordenados por prioridad, mostrá primero los que aparecen antes en la lista):
+${list}
+
+Reglas para usar esta lista:
+- Si el huésped pregunta dónde comer, dónde hay una farmacia, mercado, panadería, lavandería, o transporte, recomendá los de esta lista que coincidan con la categoría preguntada (nombre, dirección y teléfono si lo tiene).
+- Si preguntan por una categoría que no está en la lista, decilo con honestidad ("no tengo un comercio de ese tipo cargado en tu zona") y no inventes ningún lugar ni recomendación genérica de internet.
+- No hace falta que muestres todos los que coinciden, con 2-3 buenas opciones alcanza salvo que pidan más.`;
+  }
+
+  return `${BASE_SYSTEM_PROMPT}\n\n${instruction}${emergencyBlock}${propertiesBlock}${comerciosBlock}`;
 }
 
 export async function POST(req) {
@@ -99,7 +123,7 @@ export async function POST(req) {
       );
     }
 
-    const { messages, lang, emergency, properties } = await req.json();
+    const { messages, lang, emergency, properties, zonaPropiedad, zonaAgencia } = await req.json();
 
     if (!Array.isArray(messages) || messages.length === 0 || messages.length > 60) {
       return Response.json({ error: "Conversación inválida." }, { status: 400 });
@@ -112,6 +136,17 @@ export async function POST(req) {
       );
     }
 
+    // Zona para buscar comercios recomendados: probamos primero con la
+    // dirección de la propiedad puntual (más precisa); si no encuentra nada
+    // (por ejemplo porque la dirección es solo calle y número, sin barrio),
+    // caemos de respaldo a la localidad general de la inmobiliaria.
+    let comercios = [];
+    if (zonaPropiedad || zonaAgencia) {
+      const allComercios = await getComercios();
+      if (zonaPropiedad) comercios = findComerciosForZone(zonaPropiedad, allComercios);
+      if (comercios.length === 0 && zonaAgencia) comercios = findComerciosForZone(zonaAgencia, allComercios);
+    }
+
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -122,7 +157,7 @@ export async function POST(req) {
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
         max_tokens: 1200,
-        system: buildSystemPrompt(lang, emergency, properties),
+        system: buildSystemPrompt(lang, emergency, properties, comercios),
         messages,
         tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 3 }],
       }),
