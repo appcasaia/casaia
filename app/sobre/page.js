@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Building2, Wrench, Store, Home, MessageCircle, Zap, Mail, Globe2, Check } from "lucide-react";
+import { Building2, Wrench, Store, Home, MessageCircle, Zap, Mail, Globe2, Check, FileText } from "lucide-react";
 import "./sobre.css";
 
 export const metadata = {
@@ -22,7 +22,8 @@ export default function SobrePage() {
     <div className="sobre">
       <header>
         <div className="container header-content">
-          <div className="logo">
+          <div className="logo" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Image src="/images/logo-casaia.png" alt="CasaIA" width={34} height={38} />
             Casa<span>IA</span>
           </div>
           <a href="/" className="btn btn-primary">
@@ -70,13 +71,15 @@ export default function SobrePage() {
 
       <section className="languages">
         <div className="container">
-          <Image
-            src="/images/banner-idiomas.png"
-            alt="Atendimento automático 24/7 em 5 idiomas: espanhol, português, inglês, francês e alemão"
-            width={515}
-            height={296}
-            style={{ width: "100%", height: "auto" }}
-          />
+          <div className="languages-img-wrap">
+            <Image
+              src="/images/banner-idiomas.png"
+              alt="Atendimento automático 24/7 em 5 idiomas: espanhol, português, inglês, francês e alemão"
+              width={515}
+              height={296}
+              style={{ width: "100%", height: "auto" }}
+            />
+          </div>
         </div>
       </section>
 
@@ -127,6 +130,10 @@ export default function SobrePage() {
               </p>
               <a href="/inmobiliarias/registro" className="btn btn-primary">
                 Cadastrar imobiliária
+              </a>
+              <a href="/CasaIA-Manual-Cadastro-Imobiliarias.pdf" target="_blank" rel="noopener noreferrer" className="manual-link">
+                <FileText size={13} style={{ display: "inline", verticalAlign: -2, marginRight: 4 }} />
+                Baixar manual de cadastro (PDF)
               </a>
             </div>
 
