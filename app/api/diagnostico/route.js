@@ -34,8 +34,10 @@ REQUIERE_VISITA: SI
 PRIORIDAD: ALTA
 CATEGORIA: PLOMERIA
 PROPIEDAD: NINGUNA
+CUPOM: NINGUNO
 (REQUIERE_VISITA es SI o NO; PRIORIDAD es ALTA, MEDIA o BAJA; CATEGORIA es PLOMERIA, ELECTRICIDAD, CERRAJERIA, AIRE_ACONDICIONADO o GENERAL)
 Para la línea PROPIEDAD: si hay más de una propiedad cargada (ver más abajo) y el huésped ya identificó en cuál está, poné el nombre EXACTO de esa propiedad tal como está cargado. Si hay una sola propiedad cargada, o ninguna, o el huésped todavía no dijo en cuál está, poné NINGUNA.
+Para la línea CUPOM: si en tu respuesta acabás de recomendar un comercio de la lista de comercios que tiene "DESCUENTO PARA HUÉSPEDES CASAIA" cargado, poné el nombre EXACTO de ese comercio seguido de "|" y el texto EXACTO del descuento tal como está cargado (ej: CUPOM: Restaurante do Zé|10% de desconto na conta). Si no mencionaste ningún comercio con descuento en esta respuesta, poné NINGUNO.
 Poné REQUIERE_VISITA: SI cuando el caso necesita intervención de un profesional matriculado (gas, electricidad de riesgo, fugas, reemplazo de componentes, instalación). Poné NO cuando es algo que la persona puede resolver sola o cuando todavía falta información y le estás preguntando algo.`;
 
 const LANG_INSTRUCTION = {
@@ -97,6 +99,7 @@ ${
         if (c.telefono) parts.push(`teléfono/WhatsApp: ${c.telefono}`);
         if (c.horarios) parts.push(`horario: ${c.horarios}`);
         if (c.descripcion) parts.push(c.descripcion);
+        if (c.descuento) parts.push(`DESCUENTO PARA HUÉSPEDES CASAIA: ${c.descuento}`);
         return "- " + parts.join(" | ");
       })
       .join("\n");
@@ -107,7 +110,8 @@ ${list}
 Reglas para usar esta lista:
 - Si el huésped pregunta dónde comer, dónde hay una farmacia, mercado, panadería, lavandería, o transporte, recomendá los de esta lista que coincidan con la categoría preguntada (nombre, dirección y teléfono si lo tiene).
 - Si preguntan por una categoría que no está en la lista, decilo con honestidad ("no tengo un comercio de ese tipo cargado en tu zona") y no inventes ningún lugar ni recomendación genérica de internet.
-- No hace falta que muestres todos los que coinciden, con 2-3 buenas opciones alcanza salvo que pidan más.`;
+- No hace falta que muestres todos los que coinciden, con 2-3 buenas opciones alcanza salvo que pidan más.
+- Si alguno de los comercios que recomendás tiene "DESCUENTO PARA HUÉSPEDES CASAIA" cargado, mencionáselo al huésped como parte de tu respuesta (ej: "de paso, tienen un descuento para huéspedes de CasaIA: ...").`;
   }
 
   return `${BASE_SYSTEM_PROMPT}\n\n${instruction}${emergencyBlock}${propertiesBlock}${comerciosBlock}`;

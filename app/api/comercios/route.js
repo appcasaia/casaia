@@ -21,7 +21,7 @@ export async function POST(req) {
     }
 
     const body = await req.json();
-    const { nombre, categoria, telefono, email, direccion, zonas, horarios, descripcion, turnstileToken } = body;
+    const { nombre, categoria, telefono, email, direccion, zonas, horarios, descripcion, descuento, turnstileToken } = body;
 
     const humanOk = await verifyTurnstile(turnstileToken, getClientIp(req));
     if (!humanOk) {
@@ -48,6 +48,7 @@ export async function POST(req) {
       zonas: zonasDeclaradas,
       horarios: horarios || "",
       descripcion: descripcion || "",
+      descuento: descuento || "",
       plan: "gratis",
       activo: true,
       createdAt: new Date().toISOString(),
@@ -66,7 +67,7 @@ export async function POST(req) {
         from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
         to: adminEmail,
         subject: `Nuevo comercio registrado en CasaIA: ${nombre}`,
-        text: `Nombre: ${nombre}\nCategoría: ${categoria}\nTeléfono: ${telefono}\nEmail: ${email || "-"}\nDirección: ${direccion || "-"}\nZonas: ${newComercio.zonas.join(", ")}\nHorarios: ${horarios || "-"}\nPlan: gratis (por defecto)`,
+        text: `Nombre: ${nombre}\nCategoría: ${categoria}\nTeléfono: ${telefono}\nEmail: ${email || "-"}\nDirección: ${direccion || "-"}\nZonas: ${newComercio.zonas.join(", ")}\nHorarios: ${horarios || "-"}\nDescuento ofrecido: ${descuento || "-"}\nPlan: gratis (por defecto)`,
       });
     }
 

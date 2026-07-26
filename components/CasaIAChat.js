@@ -22,6 +22,7 @@ import {
   Siren,
   BadgeCheck,
   Store,
+  Ticket,
 } from "lucide-react";
 
 const T = {
@@ -309,15 +310,18 @@ function parseRequiereVisita(rawText) {
   let priority = null;
   let categoria = null;
   let propiedadIdentificada = null;
+  let cupomComercio = null;
+  let cupomDescuento = null;
   let contentLines = [...lines];
 
-  // Busca las últimas líneas de marcadores (PRIORIDAD, REQUIERE_VISITA, CATEGORIA, PROPIEDAD)
+  // Busca las últimas líneas de marcadores (PRIORIDAD, REQUIERE_VISITA, CATEGORIA, PROPIEDAD, CUPOM)
   while (contentLines.length > 0) {
     const last = contentLines[contentLines.length - 1].trim();
     const priorityMatch = last.match(/^PRIORIDAD:\s*(ALTA|MEDIA|BAJA)$/i);
     const visitaMatch = last.match(/^REQUIERE_VISITA:\s*(SI|NO)$/i);
     const categoriaMatch = last.match(/^CATEGORIA:\s*(PLOMERIA|ELECTRICIDAD|CERRAJERIA|AIRE_ACONDICIONADO|GENERAL)$/i);
     const propiedadMatch = last.match(/^PROPIEDAD:\s*(.+)$/i);
+    const cupomMatch = last.match(/^CUPOM:\s*(.+)$/i);
     if (priorityMatch) {
       priority = priorityMatch[1].toUpperCase();
       contentLines = contentLines.slice(0, -1);
@@ -331,12 +335,32 @@ function parseRequiereVisita(rawText) {
       const val = propiedadMatch[1].trim();
       propiedadIdentificada = val.toUpperCase() === "NINGUNA" ? null : val;
       contentLines = contentLines.slice(0, -1);
+    } else if (cupomMatch) {
+      const val = cupomMatch[1].trim();
+      if (val.toUpperCase() !== "NINGUNO" && val.includes("|")) {
+        const [nombreComercio, ...descPartes] = val.split("|");
+        cupomComercio = nombreComercio.trim();
+        cupomDescuento = descPartes.join("|").trim();
+      }
+      contentLines = contentLines.slice(0, -1);
     } else {
       break;
     }
   }
 
-  return { text: contentLines.join("\n").trim(), requiereVisita, priority, categoria, propiedadIdentificada };
+  return {
+    text: contentLines.join("\n").trim(),
+    requiereVisita,
+    priority,
+    categoria,
+    propiedadIdentificada,
+    cupomComercio,
+    cupomDescuento,
+  };
+}
+
+function generarCodigoCupom() {
+  return "CASAIA-" + Math.random().toString(36).slice(2, 6).toUpperCase();
 }
 
 const LogoMark = ({ size = 24 }) => (
@@ -464,7 +488,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
   };
 
   const openConversation = (conv) => {
-    setMessages(conv.messages.map((m) => ({ role: m.role, text: m.text, image: null })));
+    setMessages(conv.messages.map((m) => ({ role: m.role, text: m.text, image: null, coupon: m.coupon || null })));
     activeConvIdRef.current = conv.id;
     setShowLeadForm(false);
     setLeadSent(false);
@@ -628,8 +652,12 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
       if (!response.ok) throw new Error(data.error || "Error de conexión");
       if (data.error) throw new Error(data.error);
 
-      const { text: cleanText, requiereVisita, priority, categoria, propiedadIdentificada } = parseRequiereVisita(data.text || "");
-      const withAssistant = [...nextHistory, { role: "assistant", text: cleanText }];
+      const { text: cleanText, requiereVisita, priority, categoria, propiedadIdentificada, cupomComercio, cupomDescuento } = parseRequiereVisita(data.text || "");
+      const assistantMsg = { role: "assistant", text: cleanText };
+      if (cupomComercio && cupomDescuento) {
+        assistantMsg.coupon = { nombre: cupomComercio, descuento: cupomDescuento, code: generarCodigoCupom() };
+      }
+      const withAssistant = [...nextHistory, assistantMsg];
       setMessages(withAssistant);
       persistConversation(withAssistant);
       if (priority) setCasePriority(priority);
@@ -1563,6 +1591,49 @@ function Bubble({ msg, techLabel }) {
           }}
         >
           {formatText(msg.text)}
+        </div>
+      )}
+      {msg.coupon && (
+        <div
+          style={{
+            marginTop: 8,
+            width: "100%",
+            maxWidth: 320,
+            background: "#1F2D2B",
+            borderRadius: 14,
+            border: "1.5px dashed #C4622A",
+            padding: "14px 16px",
+            position: "relative",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+            <Ticket size={15} color="#C4622A" />
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#C4622A", textTransform: "uppercase", letterSpacing: 0.5 }}>
+              Cupón CasaIA
+            </span>
+          </div>
+          <div style={{ fontFamily: "'Roboto Slab', serif", fontSize: 15, fontWeight: 700, color: "#F3EDE2", marginBottom: 4 }}>
+            {msg.coupon.nombre}
+          </div>
+          <div style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#CFE0D6", marginBottom: 10, lineHeight: 1.4 }}>
+            {msg.coupon.descuento}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              borderTop: "1px dashed #4A5A54",
+              paddingTop: 8,
+            }}
+          >
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "#8A7A5C" }}>
+              Mostrá esto en el local
+            </span>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "#F3EDE2", fontWeight: 700 }}>
+              {msg.coupon.code}
+            </span>
+          </div>
         </div>
       )}
     </div>

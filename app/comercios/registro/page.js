@@ -36,6 +36,7 @@ export default function ComerciosRegistroPage() {
     zonas: "",
     horarios: "",
     descripcion: "",
+    descuento: "",
   });
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
@@ -143,6 +144,19 @@ export default function ComerciosRegistroPage() {
 
         <label style={labelStyle}>Descripción breve (opcional) / Descrição breve (opcional)</label>
         <input style={inputStyle} value={form.descripcion} onChange={update("descripcion")} placeholder="Ej/Ex: Comida caseira, delivery disponível" />
+
+        <label style={labelStyle}>¿Ofrecés descuento a huéspedes CasaIA? (opcional) / Oferece desconto a hóspedes CasaIA? (opcional)</label>
+        <input
+          style={inputStyle}
+          value={form.descuento}
+          onChange={update("descuento")}
+          placeholder="Ej/Ex: 10% de desconto na conta, mostrando o chat do CasaIA"
+        />
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 11.5, color: "#8A7A5C", marginTop: -8, marginBottom: 12 }}>
+          Si lo completás, CasaIA se lo va a mencionar al huésped junto con un cupón cuando te recomiende.
+          <br />
+          Se preencher, o CasaIA vai mencionar isso ao hóspede junto com um cupom quando recomendar você.
+        </p>
 
         <TurnstileWidget onVerify={setTurnstileToken} />
 

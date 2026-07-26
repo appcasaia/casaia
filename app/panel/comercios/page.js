@@ -134,6 +134,11 @@ export default function ComerciosPanelPage() {
                       Dirección: {c.direccion}
                     </div>
                   )}
+                  {c.descuento && (
+                    <div style={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: "#C4622A", fontWeight: 600, marginTop: 2 }}>
+                      🎟️ {c.descuento}
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <button
