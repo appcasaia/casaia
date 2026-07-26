@@ -22,8 +22,8 @@ export default function SobrePage() {
     <div className="sobre">
       <header>
         <div className="container header-content">
-          <div className="logo" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Image src="/images/logo-casaia.png" alt="CasaIA" width={34} height={38} />
+          <div className="logo" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <Image src="/images/logo-casaia.png" alt="CasaIA" width={52} height={58} />
             Casa<span>IA</span>
           </div>
           <a href="/" className="btn btn-primary">
