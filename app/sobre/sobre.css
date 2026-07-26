@@ -1,0 +1,51 @@
+.sobre * { box-sizing: border-box; }
+.sobre .container { width: 90%; max-width: 1200px; margin: auto; }
+.sobre { font-family: Inter, sans-serif; background: #fff; color: #1b1b1b; }
+.sobre h1, .sobre h2, .sobre h3 { font-family: "Roboto Slab", serif; }
+.sobre header { background: #082B52; padding: 20px 0; }
+.sobre .header-content { display: flex; justify-content: space-between; align-items: center; }
+.sobre .logo { font-family: "Roboto Slab", serif; font-size: 30px; font-weight: 700; color: white; }
+.sobre .logo span { color: #F58220; }
+.sobre .btn { padding: 14px 28px; border-radius: 12px; font-weight: 600; text-decoration: none; display: inline-block; transition: .3s; font-family: Inter, sans-serif; }
+.sobre .btn-primary { background: #F58220; color: white; }
+.sobre .btn-primary:hover { opacity: .9; }
+.sobre .btn-outline { border: 2px solid white; color: white; }
+.sobre .btn-outline:hover { background: white; color: #082B52; }
+.sobre .hero { background: linear-gradient(180deg, #082B52, #0d3768); padding: 80px 0; color: white; }
+.sobre .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+.sobre .badge { display: inline-block; background: rgba(255,255,255,.15); padding: 8px 14px; border-radius: 50px; margin-bottom: 20px; font-family: "IBM Plex Mono", monospace; font-size: 13px; }
+.sobre .hero h1 { font-size: 56px; line-height: 1.1; margin-bottom: 20px; }
+.sobre .hero h1 span { color: #F58220; }
+.sobre .hero p { font-size: 18px; line-height: 1.7; margin-bottom: 35px; }
+.sobre .hero-buttons { display: flex; gap: 15px; flex-wrap: wrap; }
+.sobre .hero-image { max-width: 340px; margin: auto; }
+.sobre .hero-image img { width: 100%; height: auto; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,.35); }
+.sobre .languages { padding: 40px 0; background: white; }
+.sobre .languages img { width: 100%; border-radius: 20px; }
+.sobre .section { padding: 90px 0; }
+.sobre .section-title { text-align: center; font-size: 40px; font-family: "Roboto Slab", serif; margin-bottom: 60px; color: #082B52; }
+.sobre .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 30px; }
+.sobre .step { background: white; padding: 35px; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,.08); text-align: center; }
+.sobre .step-icon { margin-bottom: 20px; display: flex; justify-content: center; }
+.sobre .step h3 { margin-bottom: 15px; color: #082B52; }
+.sobre .step p { color: #4a4a4a; font-size: 14.5px; }
+.sobre .cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 30px; }
+.sobre .card { background: white; padding: 35px; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,.08); }
+.sobre .card h3 { color: #082B52; margin-bottom: 15px; font-size: 24px; display: flex; align-items: center; }
+.sobre .card p { line-height: 1.7; margin-bottom: 25px; color: #4a4a4a; font-size: 14.5px; }
+.sobre .benefits { background: #082B52; color: white; }
+.sobre .benefits-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 30px; }
+.sobre .benefit { background: rgba(255,255,255,.08); padding: 25px; border-radius: 18px; font-family: Inter, sans-serif; }
+.sobre .cta { background: #F58220; padding: 80px 0; text-align: center; color: white; }
+.sobre .cta h2 { font-size: 44px; margin-bottom: 15px; font-family: "Roboto Slab", serif; }
+.sobre .cta p { font-size: 18px; margin-bottom: 30px; font-family: Inter, sans-serif; }
+.sobre footer { background: #061f3b; color: white; padding: 35px 0; text-align: center; }
+.sobre footer p { margin: 8px 0; font-family: Inter, sans-serif; }
+@media (max-width: 900px) {
+  .sobre .hero-grid, .sobre .steps, .sobre .cards, .sobre .benefits-grid { grid-template-columns: 1fr; }
+  .sobre .hero h1 { font-size: 38px; }
+  .sobre .hero { text-align: center; }
+  .sobre .hero-buttons { justify-content: center; }
+  .sobre .section-title { font-size: 30px; }
+  .sobre .cta h2 { font-size: 32px; }
+}
