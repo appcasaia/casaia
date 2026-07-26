@@ -2,9 +2,9 @@
 .sobre .container { width: 90%; max-width: 1200px; margin: auto; }
 .sobre { font-family: Inter, sans-serif; background: #fff; color: #1b1b1b; }
 .sobre h1, .sobre h2, .sobre h3 { font-family: "Roboto Slab", serif; }
-.sobre header { background: #082B52; padding: 20px 0; }
+.sobre header { background: #082B52; padding: 30px 0; }
 .sobre .header-content { display: flex; justify-content: space-between; align-items: center; }
-.sobre .logo { font-family: "Roboto Slab", serif; font-size: 42px; font-weight: 700; color: white; }
+.sobre .logo { font-family: "Roboto Slab", serif; font-size: 68px; font-weight: 700; color: white; }
 .sobre .logo span { color: #F58220; }
 .sobre .btn { padding: 14px 28px; border-radius: 12px; font-weight: 600; text-decoration: none; display: inline-block; transition: .3s; font-family: Inter, sans-serif; }
 .sobre .btn-primary { background: #F58220; color: white; }

@@ -22,13 +22,10 @@ export default function SobrePage() {
     <div className="sobre">
       <header>
         <div className="container header-content">
-          <div className="logo" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <Image src="/images/logo-casaia.png" alt="CasaIA" width={52} height={58} />
+          <div className="logo" style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <Image src="/images/logo-casaia.png" alt="CasaIA" width={90} height={100} />
             Casa<span>IA</span>
           </div>
-          <a href="/" className="btn btn-primary">
-            Testar o assistente
-          </a>
         </div>
       </header>
 
