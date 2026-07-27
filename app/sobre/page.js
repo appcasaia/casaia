@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { headers } from "next/headers";
 import { Building2, Wrench, Store, Home, MessageCircle, Zap, Mail, Globe2, Check, FileText } from "lucide-react";
 import "./sobre.css";
 
@@ -17,7 +18,22 @@ const benefits = [
   "Melhor experiência para hóspedes",
 ];
 
+// Detecta el idioma preferido del navegador (header Accept-Language) del lado
+// del servidor, para no tener parpadeo de idioma. Solo dos opciones: si el
+// idioma principal es español, mostramos el manual en español; para
+// cualquier otro caso (incluido portugués) mostramos el de portugués.
+function detectManual() {
+  const acceptLanguage = headers().get("accept-language") || "";
+  const primaryLang = acceptLanguage.split(",")[0]?.trim().toLowerCase() || "";
+  const isSpanish = primaryLang.startsWith("es");
+
+  return isSpanish
+    ? { href: "/CasaIA-Manual-Registro-Espanol.pdf", label: "Descargar manual de registro (PDF)" }
+    : { href: "/CasaIA-Manual-Cadastro-Imobiliarias.pdf", label: "Baixar manual de cadastro (PDF)" };
+}
+
 export default function SobrePage() {
+  const manual = detectManual();
   return (
     <div className="sobre">
       <header>
@@ -128,9 +144,9 @@ export default function SobrePage() {
               <a href="/inmobiliarias/registro" className="btn btn-primary">
                 Cadastrar imobiliária
               </a>
-              <a href="/CasaIA-Manual-Cadastro-Imobiliarias.pdf" target="_blank" rel="noopener noreferrer" className="manual-link">
+              <a href={manual.href} target="_blank" rel="noopener noreferrer" className="manual-link">
                 <FileText size={13} style={{ display: "inline", verticalAlign: -2, marginRight: 4 }} />
-                Baixar manual de cadastro (PDF)
+                {manual.label}
               </a>
             </div>
 
