@@ -157,14 +157,22 @@ export async function POST(req) {
 
     // Avisos por WhatsApp (Meta Cloud API). No hace nada mientras no esté
     // configurado (ver lib/whatsapp.js) — el email sigue siendo el respaldo.
+    // La plantilla nuevo_lead_casaia está en portugués (público de Brasil),
+    // con variables nombradas: prioridade, cliente, telefone, zona, resumo.
     const resumenCorto = (summary || "").slice(0, 300);
     for (const m of matches) {
       if (m.telefono) {
         await sendWhatsAppTemplate({
           to: m.telefono,
           templateName: "nuevo_lead_casaia",
-          languageCode: "es",
-          variables: [priority || "MEDIA", name, phone, propertyName || zone || "-", resumenCorto],
+          languageCode: "pt_BR",
+          variables: {
+            prioridade: priority || "MEDIA",
+            cliente: name,
+            telefone: phone,
+            zona: propertyName || zone || "-",
+            resumo: resumenCorto,
+          },
         });
       }
     }
@@ -172,8 +180,14 @@ export async function POST(req) {
       await sendWhatsAppTemplate({
         to: agency.telefono,
         templateName: "nuevo_lead_casaia",
-        languageCode: "es",
-        variables: ["ALTA", name, phone, propertyName || zone || "-", resumenCorto],
+        languageCode: "pt_BR",
+        variables: {
+          prioridade: "ALTA",
+          cliente: name,
+          telefone: phone,
+          zona: propertyName || zone || "-",
+          resumo: resumenCorto,
+        },
       });
     }
 
