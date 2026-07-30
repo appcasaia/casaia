@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { Building2, Loader2, CheckCircle2, Plus, Trash2, Copy, Check, KeyRound } from "lucide-react";
 import TurnstileWidget from "../../../components/TurnstileWidget";
 import { CATEGORIAS_TECNICO, emptyTecnicosPropiedad } from "../../../lib/categorias";
+import { openQrPrintWindow } from "../../../lib/qrPrint";
+import { Printer } from "lucide-react";
 
 const inputStyle = {
   width: "100%",
@@ -165,6 +167,17 @@ export default function InmobiliariasRegistroPage() {
                         {p.nombre}
                       </div>
                       <LinkBox text={p.link} onCopy={() => copyText(p.link, p.slug)} copied={copied === p.slug} />
+                      <button
+                        onClick={() => openQrPrintWindow({ agencyName: form.nombre, propertyName: p.nombre, link: p.link })}
+                        style={{
+                          display: "inline-flex", alignItems: "center", gap: 6, marginTop: 8,
+                          border: "1px solid #E0D8C7", background: "#F3EDE2", color: "#1F2D2B",
+                          borderRadius: 8, padding: "6px 12px", fontFamily: "Inter, sans-serif",
+                          fontSize: 12, fontWeight: 600, cursor: "pointer",
+                        }}
+                      >
+                        <Printer size={13} /> Imprimir QR (6x6cm) / Imprimir QR (6x6cm)
+                      </button>
                     </div>
                   </div>
                 ))}

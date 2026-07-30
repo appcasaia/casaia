@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Lock, Loader2, Building2, Copy, Check, Trash2, LockOpen } from "lucide-react";
+import { Lock, Loader2, Building2, Copy, Check, Trash2, LockOpen, ChevronDown, ChevronUp, Wrench, Phone } from "lucide-react";
+import { labelCategoria } from "../../../lib/categorias";
 
 const PLAN_COLORS = { gratis: "#8A7A5C", profesional: "#5B7065", premium: "#C4622A" };
 
@@ -12,6 +13,7 @@ export default function InmobiliariasPanelPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [copiedSlug, setCopiedSlug] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
 
   const load = async () => {
     if (!key.trim()) return;
@@ -131,8 +133,13 @@ export default function InmobiliariasPanelPage() {
                 {ag.contacto} · {ag.email} {ag.telefono && `· ${ag.telefono}`}
               </div>
               <div style={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: "#5B7065", marginTop: 6 }}>
-                Localidades: {ag.localidades || "-"} · {ag.tecnicos?.length || 0} técnicos declarados
+                Localidades: {ag.localidades || "-"}
               </div>
+              <TecnicosToggle
+                agency={ag}
+                expanded={expandedId === ag.id}
+                onToggle={() => setExpandedId((prev) => (prev === ag.id ? null : ag.id))}
+              />
               <div
                 style={{
                   display: "flex", alignItems: "center", gap: 8, background: "#F3EDE2", borderRadius: 8,
@@ -209,6 +216,96 @@ export default function InmobiliariasPanelPage() {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function TecnicoRow({ nombre, telefono, sub }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0" }}>
+      <Wrench size={13} color="#8A7A5C" style={{ flexShrink: 0 }} />
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div style={{ fontFamily: "Inter, sans-serif", fontSize: 12.5, fontWeight: 600, color: "#1F2D2B" }}>
+          {nombre}
+          {sub && (
+            <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 400, color: "#8A7A5C" }}> — {sub}</span>
+          )}
+        </div>
+        {telefono && (
+          <div style={{ display: "flex", alignItems: "center", gap: 4, fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "#5B7065" }}>
+            <Phone size={10} /> {telefono}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TecnicosToggle({ agency, expanded, onToggle }) {
+  const generales = agency.tecnicos || [];
+
+  // Técnicos específicos por propiedad: recorremos cada propiedad y sus
+  // categorías, y nos quedamos solo con los slots que tienen datos cargados.
+  const porPropiedad = (agency.propiedades || []).flatMap((prop) => {
+    const map = prop.tecnicosPropiedad || {};
+    return Object.entries(map)
+      .filter(([, t]) => t?.nombre && t?.telefono)
+      .map(([categoriaId, t]) => ({
+        propiedad: prop.nombre,
+        categoriaId,
+        nombre: t.nombre,
+        telefono: t.telefono,
+      }));
+  });
+
+  const total = generales.length + porPropiedad.length;
+
+  return (
+    <div>
+      <button
+        onClick={onToggle}
+        disabled={total === 0}
+        style={{
+          display: "flex", alignItems: "center", gap: 4, marginTop: 4,
+          border: "none", background: "transparent", padding: 0,
+          fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600,
+          color: total === 0 ? "#B9AF97" : "#C4622A",
+          cursor: total === 0 ? "default" : "pointer",
+        }}
+      >
+        {total} técnico{total === 1 ? "" : "s"} declarado{total === 1 ? "" : "s"}
+        {total > 0 && (expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />)}
+      </button>
+
+      {expanded && total > 0 && (
+        <div style={{ marginTop: 8, background: "#F3EDE2", borderRadius: 10, padding: "8px 12px" }}>
+          {generales.length > 0 && (
+            <>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#8A7A5C", textTransform: "uppercase", marginBottom: 2 }}>
+                Técnicos generales
+              </div>
+              {generales.map((t, i) => (
+                <TecnicoRow key={`g-${i}`} nombre={t.nombre} telefono={t.telefono} sub={t.especialidad || labelCategoria(t.categoria)} />
+              ))}
+            </>
+          )}
+          {porPropiedad.length > 0 && (
+            <>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#8A7A5C", textTransform: "uppercase", marginTop: generales.length ? 10 : 0, marginBottom: 2 }}>
+                Técnicos por propiedad
+              </div>
+              {porPropiedad.map((t, i) => (
+                <TecnicoRow
+                  key={`p-${i}`}
+                  nombre={t.nombre}
+                  telefono={t.telefono}
+                  sub={`${t.propiedad} · ${labelCategoria(t.categoriaId)}`}
+                />
+              ))}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

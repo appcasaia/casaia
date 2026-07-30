@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { Building2, Loader2, Plus, Trash2, Save, Check, KeyRound, AlertCircle, Sparkles } from "lucide-react";
 import { AGENCY_PLAN_LIMITS, PLAN_LABELS, estaBloqueadoPorPlan } from "../../../../lib/subscriptions";
 import { CATEGORIAS_TECNICO, emptyTecnicosPropiedad } from "../../../../lib/categorias";
+import { openQrPrintWindow } from "../../../../lib/qrPrint";
+import { Printer } from "lucide-react";
 
 const smallInput = {
   padding: "8px 10px",
@@ -372,9 +374,26 @@ export default function EditarInmobiliariaPage({ params, searchParams }) {
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#8A7A5C", marginBottom: 3 }}>
                       LINK DE ESTA PROPIEDAD / DESTA PROPRIEDADE
                     </div>
-                    <div style={{ fontFamily: "Inter, sans-serif", fontSize: 11, color: "#1F2D2B", wordBreak: "break-all" }}>
+                    <div style={{ fontFamily: "Inter, sans-serif", fontSize: 11, color: "#1F2D2B", wordBreak: "break-all", marginBottom: 6 }}>
                       casaia.net/i/{slug}/{prop.slug}
                     </div>
+                    <button
+                      onClick={() =>
+                        openQrPrintWindow({
+                          agencyName: agency?.nombre,
+                          propertyName: prop.nombre,
+                          link: `https://casaia.net/i/${slug}/${prop.slug}`,
+                        })
+                      }
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 6,
+                        border: "1px solid #E0D8C7", background: "#F3EDE2", color: "#1F2D2B",
+                        borderRadius: 8, padding: "5px 10px", fontFamily: "Inter, sans-serif",
+                        fontSize: 11, fontWeight: 600, cursor: "pointer",
+                      }}
+                    >
+                      <Printer size={12} /> Imprimir QR (6x6cm) / Imprimir QR (6x6cm)
+                    </button>
                   </div>
                 </div>
               )}
