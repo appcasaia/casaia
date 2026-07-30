@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Lock, Loader2, Building2, Copy, Check, Trash2, LockOpen, ChevronDown, ChevronUp, Wrench, Phone } from "lucide-react";
+import { Lock, Loader2, Building2, Copy, Check, Trash2, LockOpen, ChevronDown, ChevronUp, Wrench, Phone, Home, MapPin } from "lucide-react";
 import { labelCategoria } from "../../../lib/categorias";
 
 const PLAN_COLORS = { gratis: "#8A7A5C", profesional: "#5B7065", premium: "#C4622A" };
@@ -14,6 +14,7 @@ export default function InmobiliariasPanelPage() {
   const [error, setError] = useState(null);
   const [copiedSlug, setCopiedSlug] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
+  const [expandedPropId, setExpandedPropId] = useState(null);
 
   const load = async () => {
     if (!key.trim()) return;
@@ -135,11 +136,18 @@ export default function InmobiliariasPanelPage() {
               <div style={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: "#5B7065", marginTop: 6 }}>
                 Localidades: {ag.localidades || "-"}
               </div>
-              <TecnicosToggle
-                agency={ag}
-                expanded={expandedId === ag.id}
-                onToggle={() => setExpandedId((prev) => (prev === ag.id ? null : ag.id))}
-              />
+              <div style={{ display: "flex", gap: 18, flexWrap: "wrap" }}>
+                <TecnicosToggle
+                  agency={ag}
+                  expanded={expandedId === ag.id}
+                  onToggle={() => setExpandedId((prev) => (prev === ag.id ? null : ag.id))}
+                />
+                <PropiedadesToggle
+                  agency={ag}
+                  expanded={expandedPropId === ag.id}
+                  onToggle={() => setExpandedPropId((prev) => (prev === ag.id ? null : ag.id))}
+                />
+              </div>
               <div
                 style={{
                   display: "flex", alignItems: "center", gap: 8, background: "#F3EDE2", borderRadius: 8,
@@ -237,6 +245,83 @@ function TecnicoRow({ nombre, telefono, sub }) {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function PropiedadRow({ prop, agencySlug }) {
+  const [copied, setCopied] = useState(false);
+  const link = prop.slug ? `casaia.net/i/${agencySlug}/${prop.slug}` : null;
+
+  const copyLink = () => {
+    if (!link) return;
+    navigator.clipboard.writeText(`https://${link}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div style={{ padding: "8px 0", borderBottom: "1px solid #E9E2D2" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+        <Home size={13} color="#8A7A5C" style={{ flexShrink: 0, marginTop: 2 }} />
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ fontFamily: "Inter, sans-serif", fontSize: 12.5, fontWeight: 600, color: "#1F2D2B" }}>
+            {prop.nombre}
+          </div>
+          {prop.direccion && (
+            <div style={{ display: "flex", alignItems: "center", gap: 4, fontFamily: "Inter, sans-serif", fontSize: 11, color: "#5B7065", marginTop: 1 }}>
+              <MapPin size={10} /> {prop.direccion}
+            </div>
+          )}
+          {(prop.checkIn || prop.checkOut) && (
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#8A7A5C", marginTop: 2 }}>
+              Check-in {prop.checkIn || "-"} · Check-out {prop.checkOut || "-"}
+            </div>
+          )}
+          {link && (
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10.5, color: "#1F2D2B", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {link}
+              </span>
+              <button onClick={copyLink} style={{ border: "none", background: "transparent", cursor: "pointer", flexShrink: 0 }}>
+                {copied ? <Check size={11} color="#2A5A3E" /> : <Copy size={11} color="#5B7065" />}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PropiedadesToggle({ agency, expanded, onToggle }) {
+  const propiedades = (agency.propiedades || []).filter((p) => p.nombre?.trim());
+  const total = propiedades.length;
+
+  return (
+    <div>
+      <button
+        onClick={onToggle}
+        disabled={total === 0}
+        style={{
+          display: "flex", alignItems: "center", gap: 4, marginTop: 4,
+          border: "none", background: "transparent", padding: 0,
+          fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600,
+          color: total === 0 ? "#B9AF97" : "#C4622A",
+          cursor: total === 0 ? "default" : "pointer",
+        }}
+      >
+        {total} propiedad{total === 1 ? "" : "es"} registrada{total === 1 ? "" : "s"}
+        {total > 0 && (expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />)}
+      </button>
+
+      {expanded && total > 0 && (
+        <div style={{ marginTop: 8, background: "#F3EDE2", borderRadius: 10, padding: "4px 12px", minWidth: 260 }}>
+          {propiedades.map((p, i) => (
+            <PropiedadRow key={p.slug || i} prop={p} agencySlug={agency.slug} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
