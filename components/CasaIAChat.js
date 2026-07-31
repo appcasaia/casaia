@@ -313,30 +313,33 @@ function parseRequiereVisita(rawText) {
   let cupomComercio = null;
   let cupomDescuento = null;
   let resumoPt = null;
-  let contentLines = [...lines];
+  const contentLines = [];
 
-  // Busca las últimas líneas de marcadores (PRIORIDAD, REQUIERE_VISITA, CATEGORIA, PROPIEDAD, CUPOM, RESUMO_PT)
-  while (contentLines.length > 0) {
-    const last = contentLines[contentLines.length - 1].trim();
-    const priorityMatch = last.match(/^PRIORIDAD:\s*(ALTA|MEDIA|BAJA)$/i);
-    const visitaMatch = last.match(/^REQUIERE_VISITA:\s*(SI|NO)$/i);
-    const categoriaMatch = last.match(/^CATEGORIA:\s*(PLOMERIA|ELECTRICIDAD|CERRAJERIA|AIRE_ACONDICIONADO|GENERAL)$/i);
-    const propiedadMatch = last.match(/^PROPIEDAD:\s*(.+)$/i);
-    const cupomMatch = last.match(/^CUPOM:\s*(.+)$/i);
-    const resumoPtMatch = last.match(/^RESUMO_PT:\s*(.+)$/i);
+  // Recorre TODAS las líneas (no solo las últimas) buscando los marcadores
+  // (PRIORIDAD, REQUIERE_VISITA, CATEGORIA, PROPIEDAD, CUPOM, RESUMO_PT).
+  // Antes esto solo funcionaba si estaban exactamente al final y sin
+  // ninguna línea rara entre medio; con una sola línea fuera de lugar
+  // (una línea en blanco extra, algo de texto después) se rompía el
+  // parseo completo y los marcadores quedaban visibles para el usuario.
+  // Recorrer todas las líneas es más tolerante a esas variaciones.
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    const priorityMatch = line.match(/^PRIORIDAD:\s*(ALTA|MEDIA|BAJA)\s*$/i);
+    const visitaMatch = line.match(/^REQUIERE_VISITA:\s*(SI|NO)\s*$/i);
+    const categoriaMatch = line.match(/^CATEGORIA:\s*(PLOMERIA|ELECTRICIDAD|CERRAJERIA|AIRE_ACONDICIONADO|GENERAL)\s*$/i);
+    const propiedadMatch = line.match(/^PROPIEDAD:\s*(.+)$/i);
+    const cupomMatch = line.match(/^CUPOM:\s*(.+)$/i);
+    const resumoPtMatch = line.match(/^RESUMO_PT:\s*(.+)$/i);
+
     if (priorityMatch) {
       priority = priorityMatch[1].toUpperCase();
-      contentLines = contentLines.slice(0, -1);
     } else if (visitaMatch) {
       requiereVisita = visitaMatch[1].toUpperCase() === "SI";
-      contentLines = contentLines.slice(0, -1);
     } else if (categoriaMatch) {
       categoria = categoriaMatch[1].toLowerCase();
-      contentLines = contentLines.slice(0, -1);
     } else if (propiedadMatch) {
       const val = propiedadMatch[1].trim();
       propiedadIdentificada = val.toUpperCase() === "NINGUNA" ? null : val;
-      contentLines = contentLines.slice(0, -1);
     } else if (cupomMatch) {
       const val = cupomMatch[1].trim();
       if (val.toUpperCase() !== "NINGUNO" && val.includes("|")) {
@@ -344,12 +347,10 @@ function parseRequiereVisita(rawText) {
         cupomComercio = nombreComercio.trim();
         cupomDescuento = descPartes.join("|").trim();
       }
-      contentLines = contentLines.slice(0, -1);
     } else if (resumoPtMatch) {
       resumoPt = resumoPtMatch[1].trim();
-      contentLines = contentLines.slice(0, -1);
     } else {
-      break;
+      contentLines.push(rawLine);
     }
   }
 
