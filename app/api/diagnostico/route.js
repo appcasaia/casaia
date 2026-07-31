@@ -35,9 +35,11 @@ PRIORIDAD: ALTA
 CATEGORIA: PLOMERIA
 PROPIEDAD: NINGUNA
 CUPOM: NINGUNO
+RESUMO_PT: Vazamento de água visível embaixo da pia da cozinha
 (REQUIERE_VISITA es SI o NO; PRIORIDAD es ALTA, MEDIA o BAJA; CATEGORIA es PLOMERIA, ELECTRICIDAD, CERRAJERIA, AIRE_ACONDICIONADO o GENERAL)
 Para la línea PROPIEDAD: si hay más de una propiedad cargada (ver más abajo) y el huésped ya identificó en cuál está, poné el nombre EXACTO de esa propiedad tal como está cargado. Si hay una sola propiedad cargada, o ninguna, o el huésped todavía no dijo en cuál está, poné NINGUNA.
 Para la línea CUPOM: si en tu respuesta acabás de recomendar un comercio de la lista de comercios que tiene "DESCUENTO PARA HUÉSPEDES CASAIA" cargado, poné el nombre EXACTO de ese comercio seguido de "|" y el texto EXACTO del descuento tal como está cargado (ej: CUPOM: Restaurante do Zé|10% de desconto na conta). Si no mencionaste ningún comercio con descuento en esta respuesta, poné NINGUNO.
+Para la línea RESUMO_PT: es OBLIGATORIA en TODAS tus respuestas, sin excepción, y SIEMPRE en portugués de Brasil — sin importar en qué idioma esté conversando el huésped (español, inglés, francés, alemán o portugués). Es un resumen brevísimo (una sola frase corta, máximo ~120 caracteres) de cuál es el problema que describió el huésped hasta el momento, pensado para que lo lea un técnico brasileño por WhatsApp. Actualizalo cada vez con el estado más reciente de la conversación (no repitas siempre lo mismo si el huésped agregó información nueva). Si todavía no hay información suficiente para resumir el problema (por ejemplo, es tu primera pregunta), poné algo breve igual, como "Hóspede ainda descrevendo o problema".
 Poné REQUIERE_VISITA: SI cuando el caso necesita intervención de un profesional matriculado (gas, electricidad de riesgo, fugas, reemplazo de componentes, instalación). Poné NO cuando es algo que la persona puede resolver sola o cuando todavía falta información y le estás preguntando algo.`;
 
 const LANG_INSTRUCTION = {

@@ -312,9 +312,10 @@ function parseRequiereVisita(rawText) {
   let propiedadIdentificada = null;
   let cupomComercio = null;
   let cupomDescuento = null;
+  let resumoPt = null;
   let contentLines = [...lines];
 
-  // Busca las últimas líneas de marcadores (PRIORIDAD, REQUIERE_VISITA, CATEGORIA, PROPIEDAD, CUPOM)
+  // Busca las últimas líneas de marcadores (PRIORIDAD, REQUIERE_VISITA, CATEGORIA, PROPIEDAD, CUPOM, RESUMO_PT)
   while (contentLines.length > 0) {
     const last = contentLines[contentLines.length - 1].trim();
     const priorityMatch = last.match(/^PRIORIDAD:\s*(ALTA|MEDIA|BAJA)$/i);
@@ -322,6 +323,7 @@ function parseRequiereVisita(rawText) {
     const categoriaMatch = last.match(/^CATEGORIA:\s*(PLOMERIA|ELECTRICIDAD|CERRAJERIA|AIRE_ACONDICIONADO|GENERAL)$/i);
     const propiedadMatch = last.match(/^PROPIEDAD:\s*(.+)$/i);
     const cupomMatch = last.match(/^CUPOM:\s*(.+)$/i);
+    const resumoPtMatch = last.match(/^RESUMO_PT:\s*(.+)$/i);
     if (priorityMatch) {
       priority = priorityMatch[1].toUpperCase();
       contentLines = contentLines.slice(0, -1);
@@ -343,6 +345,9 @@ function parseRequiereVisita(rawText) {
         cupomDescuento = descPartes.join("|").trim();
       }
       contentLines = contentLines.slice(0, -1);
+    } else if (resumoPtMatch) {
+      resumoPt = resumoPtMatch[1].trim();
+      contentLines = contentLines.slice(0, -1);
     } else {
       break;
     }
@@ -356,6 +361,7 @@ function parseRequiereVisita(rawText) {
     propiedadIdentificada,
     cupomComercio,
     cupomDescuento,
+    resumoPt,
   };
 }
 
@@ -391,6 +397,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
   const [casePriority, setCasePriority] = useState(null); // ALTA | MEDIA | BAJA | null
   const [caseCategoria, setCaseCategoria] = useState(null); // plomeria | electricidad | cerrajeria | aire_acondicionado | general | null
   const [casePropiedad, setCasePropiedad] = useState(null); // nombre de propiedad identificada por la IA, si hay varias
+  const [caseResumoPt, setCaseResumoPt] = useState(null); // resumen corto en portugués, generado por la IA, para notificaciones a técnicos/inmobiliarias sin importar el idioma del huésped
   const [turnstileToken, setTurnstileToken] = useState(null);
   const [lead, setLead] = useState({ name: "", phone: "", zone: "" });
   const [sendingLead, setSendingLead] = useState(false);
@@ -482,6 +489,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
     setError(null);
     setEmergencyMode(false);
     setCasePriority(null);
+    setCaseResumoPt(null);
     setTurnstileToken(null);
     activeConvIdRef.current = null;
     setShowHistory(false);
@@ -496,6 +504,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
     setError(null);
     setEmergencyMode(false);
     setCasePriority(null);
+    setCaseResumoPt(null);
     setShowHistory(false);
   };
 
@@ -652,7 +661,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
       if (!response.ok) throw new Error(data.error || "Error de conexión");
       if (data.error) throw new Error(data.error);
 
-      const { text: cleanText, requiereVisita, priority, categoria, propiedadIdentificada, cupomComercio, cupomDescuento } = parseRequiereVisita(data.text || "");
+      const { text: cleanText, requiereVisita, priority, categoria, propiedadIdentificada, cupomComercio, cupomDescuento, resumoPt } = parseRequiereVisita(data.text || "");
       const assistantMsg = { role: "assistant", text: cleanText };
       if (cupomComercio && cupomDescuento) {
         assistantMsg.coupon = { nombre: cupomComercio, descuento: cupomDescuento, code: generarCodigoCupom() };
@@ -663,6 +672,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
       if (priority) setCasePriority(priority);
       if (categoria) setCaseCategoria(categoria);
       if (propiedadIdentificada) setCasePropiedad(propiedadIdentificada);
+      if (resumoPt) setCaseResumoPt(resumoPt);
       if (requiereVisita) setShowLeadForm(true);
     } catch (e) {
       setError(e.message || t.connectionError);
@@ -694,9 +704,25 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
     if (!lead.name.trim() || !lead.phone.trim()) return;
     setSendingLead(true);
     try {
+      // Resumen completo (cliente + IA) — se usa en el email al admin/técnico,
+      // donde el detalle completo de la conversación es útil.
       const summary = messages
         .map((m) => `${m.role === "user" ? "Cliente" : "Técnico IA"}: ${m.text || "(foto)"}`)
         .join("\n");
+
+      // Resumen corto para WhatsApp: preferimos el que ya generó la IA en
+      // portugués (caseResumoPt) — así el técnico/inmobiliaria en Brasil
+      // siempre lo recibe en su idioma, sin importar en qué idioma haya
+      // chateado el huésped (español, inglés, francés, alemán). Si por
+      // algún motivo no está disponible, caemos de respaldo a armar algo
+      // con los mensajes del huésped tal como los escribió.
+      const clientSummary =
+        caseResumoPt ||
+        messages
+          .filter((m) => m.role === "user" && m.text)
+          .map((m) => m.text)
+          .join(" — ")
+          .slice(0, 300);
 
       const res = await fetch("/api/lead", {
         method: "POST",
@@ -704,6 +730,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
         body: JSON.stringify({
           ...lead,
           summary,
+          clientSummary,
           agencySlug,
           propertyName:
             agencyProperties?.length === 1

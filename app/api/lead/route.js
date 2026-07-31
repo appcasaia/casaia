@@ -19,7 +19,7 @@ export async function POST(req) {
       );
     }
 
-    const { name, phone, zone, summary, agencySlug, propertyName, priority, categoria, emergency, turnstileToken } = await req.json();
+    const { name, phone, zone, summary, clientSummary, agencySlug, propertyName, priority, categoria, emergency, turnstileToken } = await req.json();
 
     const humanOk = await verifyTurnstile(turnstileToken, getClientIp(req));
     if (!humanOk) {
@@ -159,7 +159,10 @@ export async function POST(req) {
     // configurado (ver lib/whatsapp.js) — el email sigue siendo el respaldo.
     // La plantilla nuevo_lead_casaia está en portugués (público de Brasil),
     // con variables nombradas: prioridade, cliente, telefone, zona, resumo.
-    const resumenCorto = (summary || "").slice(0, 300);
+    // Usamos clientSummary (solo lo que describió el cliente) en vez del
+    // "summary" completo, que mezcla también las respuestas de la IA y
+    // queda ilegible en un mensaje corto de WhatsApp.
+    const resumenCorto = (clientSummary || summary || "").slice(0, 300);
     for (const m of matches) {
       if (m.telefono) {
         await sendWhatsAppTemplate({
