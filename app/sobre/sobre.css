@@ -1,53 +1,204 @@
+/* ============================================================
+   CasaIA — /sobre
+   Paleta de marca real (tomada del logo): navy #082B52 + naranja
+   #F58220. Se suma un crema cálido (#FAF6EE) para romper el
+   blanco/navy puro entre secciones, y un motivo visual repetido
+   de "tag" (etiqueta con borde punteado y esquina cortada) que
+   remite al QR físico que se imprime y se pega en cada puerta —
+   el elemento más característico del producto.
+   ============================================================ */
+
+:root {
+  --navy: #082B52;
+  --navy-deep: #061f3b;
+  --navy-soft: #0d3768;
+  --orange: #F58220;
+  --cream: #FAF6EE;
+  --ink: #1b1b1b;
+  --ink-soft: #4a4a4a;
+}
+
 .sobre * { box-sizing: border-box; }
-.sobre .container { width: 90%; max-width: 1200px; margin: auto; }
-.sobre { font-family: Inter, sans-serif; background: #fff; color: #1b1b1b; }
+.sobre .container { width: 90%; max-width: 1180px; margin: auto; }
+.sobre { font-family: Inter, sans-serif; background: #fff; color: var(--ink); }
 .sobre h1, .sobre h2, .sobre h3 { font-family: "Roboto Slab", serif; }
-.sobre header { background: #082B52; padding: 30px 0; }
+
+/* ---------- Tag / motivo QR ----------
+   Chip con borde punteado y esquina "cortada" (clip-path), como una
+   etiqueta física. Se reutiliza en el eyebrow del hero y en el ícono
+   del primer paso ("Un QR en cada puerta"). */
+.sobre .tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, .1);
+  border: 1.5px dashed rgba(255, 255, 255, .45);
+  padding: 8px 16px 8px 14px;
+  margin-bottom: 22px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: #fff;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+
+/* ---------- Header ---------- */
+.sobre header { background: var(--navy); padding: 26px 0; }
 .sobre .header-content { display: flex; justify-content: space-between; align-items: center; }
-.sobre .logo { font-family: "Roboto Slab", serif; font-size: 68px; font-weight: 700; color: white; }
-.sobre .logo span { color: #F58220; }
-.sobre .btn { padding: 14px 28px; border-radius: 12px; font-weight: 600; text-decoration: none; display: inline-block; transition: .3s; font-family: Inter, sans-serif; }
-.sobre .btn-primary { background: #F58220; color: white; }
-.sobre .btn-primary:hover { opacity: .9; }
-.sobre .btn-outline { border: 2px solid white; color: white; }
-.sobre .btn-outline:hover { background: white; color: #082B52; }
-.sobre .hero { background: linear-gradient(180deg, #082B52, #0d3768); padding: 80px 0; color: white; }
-.sobre .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
-.sobre .badge { display: inline-block; background: rgba(255,255,255,.15); padding: 8px 14px; border-radius: 50px; margin-bottom: 20px; font-family: "IBM Plex Mono", monospace; font-size: 13px; }
-.sobre .hero h1 { font-size: 56px; line-height: 1.1; margin-bottom: 20px; }
-.sobre .hero h1 span { color: #F58220; }
-.sobre .hero p { font-size: 18px; line-height: 1.7; margin-bottom: 35px; }
+.sobre .logo { font-family: "Roboto Slab", serif; font-size: 40px; font-weight: 700; color: white; display: flex; align-items: center; gap: 12px; letter-spacing: -.01em; }
+.sobre .logo img { height: 44px; width: auto; }
+.sobre .logo span { color: var(--orange); }
+
+/* ---------- Botones ---------- */
+.sobre .btn {
+  padding: 15px 30px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  display: inline-block;
+  transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease, background-color .18s ease;
+  font-family: Inter, sans-serif;
+}
+.sobre .btn-primary { background: var(--orange); color: white; box-shadow: 0 6px 18px rgba(245, 130, 32, .3); }
+.sobre .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(245, 130, 32, .4); }
+.sobre .btn-outline { border: 1.5px solid rgba(255, 255, 255, .7); color: white; }
+.sobre .btn-outline:hover { background: white; color: var(--navy); transform: translateY(-2px); }
+.sobre .cta .btn-outline { border-color: rgba(255, 255, 255, .85); }
+.sobre .cta .btn-outline:hover { color: var(--orange); }
+
+/* ---------- Hero ---------- */
+.sobre .hero { position: relative; background: linear-gradient(165deg, var(--navy) 0%, var(--navy-soft) 100%); padding: 90px 0; color: white; overflow: hidden; }
+.sobre .hero-bg-dots {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, .12) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 70% 60% at 78% 30%, black 0%, transparent 70%);
+}
+.sobre .hero-grid { position: relative; display: grid; grid-template-columns: 1.05fr .95fr; gap: 60px; align-items: center; }
+.sobre .hero h1 { font-size: 58px; line-height: 1.06; margin-bottom: 22px; letter-spacing: -.01em; font-weight: 700; }
+.sobre .hero h1 span { color: var(--orange); }
+.sobre .hero p { font-size: 18px; line-height: 1.7; margin-bottom: 36px; color: rgba(255, 255, 255, .88); max-width: 480px; }
 .sobre .hero-buttons { display: flex; gap: 15px; flex-wrap: wrap; }
-.sobre .hero-image { max-width: 340px; margin: auto; }
-.sobre .hero-image img { width: 100%; height: auto; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,.35); }
-.sobre .languages { padding: 40px 0; background: white; }
-.sobre .languages-img-wrap { max-width: 620px; margin: auto; }
-.sobre .languages img { width: 100%; height: auto; border-radius: 20px; }
-.sobre .section { padding: 90px 0; }
-.sobre .section-title { text-align: center; font-size: 40px; font-family: "Roboto Slab", serif; margin-bottom: 60px; color: #082B52; }
-.sobre .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 30px; }
-.sobre .step { background: white; padding: 35px; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,.08); text-align: center; }
-.sobre .step-icon { margin-bottom: 20px; display: flex; justify-content: center; }
-.sobre .step h3 { margin-bottom: 15px; color: #082B52; }
-.sobre .step p { color: #4a4a4a; font-size: 14.5px; }
-.sobre .cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 30px; }
-.sobre .card { background: white; padding: 35px; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,.08); }
-.sobre .card h3 { color: #082B52; margin-bottom: 15px; font-size: 24px; display: flex; align-items: center; }
-.sobre .card p { line-height: 1.7; margin-bottom: 25px; color: #4a4a4a; font-size: 14.5px; }
-.sobre .manual-link { display: block; margin-top: 12px; font-family: Inter, sans-serif; font-size: 13.5px; color: #082B52; text-decoration: underline; }
-.sobre .benefits { background: #082B52; color: white; }
-.sobre .benefits-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 30px; }
-.sobre .benefit { background: rgba(255,255,255,.08); padding: 25px; border-radius: 18px; font-family: Inter, sans-serif; }
-.sobre .cta { background: #F58220; padding: 80px 0; text-align: center; color: white; }
-.sobre .cta h2 { font-size: 44px; margin-bottom: 15px; font-family: "Roboto Slab", serif; }
-.sobre .cta p { font-size: 18px; margin-bottom: 30px; font-family: Inter, sans-serif; }
-.sobre footer { background: #061f3b; color: white; padding: 35px 0; text-align: center; }
-.sobre footer p { margin: 8px 0; font-family: Inter, sans-serif; }
+.sobre .hero-image { max-width: 320px; margin: auto; }
+.sobre .hero-image img { width: 100%; height: auto; border-radius: 22px; box-shadow: 0 24px 60px rgba(0, 0, 0, .4); }
+
+/* ---------- Banda de idiomas ---------- */
+.sobre .languages { padding: 44px 0 30px; background: white; }
+.sobre .languages-img-wrap { max-width: 600px; margin: auto; }
+.sobre .languages img { width: 100%; height: auto; border-radius: 18px; }
+
+/* ---------- Secciones genéricas ---------- */
+.sobre .section { padding: 92px 0; }
+.sobre .section-cream { background: var(--cream); }
+.sobre .section-title {
+  text-align: center;
+  font-size: 38px;
+  font-weight: 700;
+  margin-bottom: 56px;
+  color: var(--navy);
+  letter-spacing: -.01em;
+}
+
+/* ---------- Cómo funciona ---------- */
+.sobre .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.sobre .step {
+  background: white;
+  padding: 36px 30px;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(8, 43, 82, .06);
+  text-align: center;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.sobre .step:hover { transform: translateY(-4px); box-shadow: 0 14px 32px rgba(8, 43, 82, .1); }
+.sobre .step-icon {
+  width: 64px; height: 64px; margin: 0 auto 20px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(245, 130, 32, .1);
+  border-radius: 16px;
+}
+.sobre .step-icon-tag {
+  background: rgba(245, 130, 32, .1);
+  border: 1.5px dashed rgba(245, 130, 32, .5);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+.sobre .step h3 { margin-bottom: 12px; color: var(--navy); font-size: 19px; }
+.sobre .step p { color: var(--ink-soft); font-size: 14.5px; line-height: 1.6; }
+
+/* ---------- Tarjetas de registro ---------- */
+.sobre .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
+.sobre .card {
+  background: white;
+  padding: 34px 30px;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(8, 43, 82, .07);
+  border-top: 3px solid var(--orange);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.sobre .card:hover { transform: translateY(-4px); box-shadow: 0 16px 34px rgba(8, 43, 82, .12); }
+.sobre .card h3 { color: var(--navy); margin-bottom: 14px; font-size: 21px; display: flex; align-items: center; gap: 10px; }
+.sobre .card-icon { flex-shrink: 0; color: var(--orange); }
+.sobre .card p { line-height: 1.7; margin-bottom: 24px; color: var(--ink-soft); font-size: 14.5px; }
+.sobre .manual-link {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 14px;
+  font-family: Inter, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--navy);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(8, 43, 82, .3);
+  width: fit-content;
+  padding-bottom: 1px;
+  transition: border-color .18s ease, color .18s ease;
+}
+.sobre .manual-link:hover { color: var(--orange); border-color: var(--orange); }
+
+/* ---------- Beneficios ---------- */
+.sobre .benefits { position: relative; background: var(--navy); color: white; overflow: hidden; }
+.sobre .benefits-bg-dots {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, .08) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 60% 80% at 15% 20%, black 0%, transparent 70%);
+}
+.sobre .benefits-grid { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.sobre .benefit {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .12);
+  padding: 22px 24px;
+  border-radius: 14px;
+  font-family: Inter, sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+}
+.sobre .benefit-check { flex-shrink: 0; color: var(--orange); }
+
+/* ---------- CTA final ---------- */
+.sobre .cta { background: var(--orange); padding: 84px 0; text-align: center; color: white; }
+.sobre .cta h2 { font-size: 40px; margin-bottom: 14px; font-weight: 700; letter-spacing: -.01em; }
+.sobre .cta p { font-size: 17.5px; margin-bottom: 32px; font-family: Inter, sans-serif; color: rgba(255, 255, 255, .92); }
+
+/* ---------- Footer ---------- */
+.sobre footer { background: var(--navy-deep); color: white; padding: 34px 0; text-align: center; }
+.sobre footer p { margin: 8px 0; font-family: Inter, sans-serif; font-size: 14px; }
+.sobre footer a { color: white; text-decoration: none; opacity: .85; }
+.sobre footer a:hover { opacity: 1; text-decoration: underline; }
+.sobre .footer-icon { display: inline; vertical-align: -2px; margin-right: 5px; }
+
+/* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .sobre .hero-grid, .sobre .steps, .sobre .cards, .sobre .benefits-grid { grid-template-columns: 1fr; }
+  .sobre .hero { text-align: center; padding: 64px 0; }
   .sobre .hero h1 { font-size: 38px; }
-  .sobre .hero { text-align: center; }
+  .sobre .hero p { margin-left: auto; margin-right: auto; }
   .sobre .hero-buttons { justify-content: center; }
-  .sobre .section-title { font-size: 30px; }
-  .sobre .cta h2 { font-size: 32px; }
+  .sobre .section { padding: 64px 0; }
+  .sobre .section-title { font-size: 29px; margin-bottom: 40px; }
+  .sobre .cta h2 { font-size: 30px; }
+  .sobre .logo { font-size: 32px; }
+  .sobre .logo img { height: 36px; }
 }
