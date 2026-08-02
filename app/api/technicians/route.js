@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { getTechnicians, saveTechnicians } from "../../../lib/technicians";
 import { checkRateLimit, getClientIp } from "../../../lib/rateLimit";
 import { verifyTurnstile } from "../../../lib/turnstile";
+import { withLock } from "../../../lib/lock";
 import { createSubscription, updateSubscriptionPlan, TECHNICIAN_PLAN_LIMITS, defaultPlanesHabilitados, puedeDesactivarsePlan } from "../../../lib/subscriptions";
 
 // Registro público: cualquier técnico/empresa puede darse de alta.
@@ -27,8 +28,6 @@ export async function POST(req) {
       return Response.json({ error: "Faltan datos obligatorios." }, { status: 400 });
     }
 
-    const technicians = await getTechnicians();
-
     const zonasDeclaradas = Array.isArray(zonas)
       ? zonas
       : String(zonas).split(",").map((z) => z.trim()).filter(Boolean);
@@ -52,19 +51,29 @@ export async function POST(req) {
       planesHabilitados: defaultPlanesHabilitados(),
     };
 
-    technicians.push(newTech);
-    await saveTechnicians(technicians);
+    // Todo el ciclo leer-modificar-guardar va adentro del lock: evita que
+    // dos técnicos registrándose casi al mismo tiempo se pisen entre sí.
+    await withLock("casaia:technicians", async () => {
+      const technicians = await getTechnicians();
+      technicians.push(newTech);
+      await saveTechnicians(technicians);
+    });
 
-    // Avisar al administrador por email de la nueva alta.
+    // El registro YA está guardado. Si el email falla, no debe parecer que
+    // el registro entero falló — va en su propio try/catch.
     if (process.env.RESEND_API_KEY) {
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      const adminEmail = process.env.LEAD_EMAIL_TO || "casaia24h@gmail.com";
-      await resend.emails.send({
-        from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
-        to: adminEmail,
-        subject: `Nuevo técnico registrado en CasaIA: ${nombre}`,
-        text: `Nombre: ${nombre}\nEmpresa: ${empresa || "-"}\nTeléfono: ${telefono}\nEmail: ${email || "-"}\nLocalidad: ${localidad || "-"}\nZonas: ${newTech.zonas.join(", ")}\nEspecialidades: ${especialidades || "-"}\nHorarios: ${horarios || "-"}\nPlan: gratis (por defecto)`,
-      });
+      try {
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        const adminEmail = process.env.LEAD_EMAIL_TO || "casaia24h@gmail.com";
+        await resend.emails.send({
+          from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
+          to: adminEmail,
+          subject: `Nuevo técnico registrado en CasaIA: ${nombre}`,
+          text: `Nombre: ${nombre}\nEmpresa: ${empresa || "-"}\nTeléfono: ${telefono}\nEmail: ${email || "-"}\nLocalidad: ${localidad || "-"}\nZonas: ${newTech.zonas.join(", ")}\nEspecialidades: ${especialidades || "-"}\nHorarios: ${horarios || "-"}\nPlan: gratis (por defecto)`,
+        });
+      } catch (emailErr) {
+        console.error("El registro se guardó bien, pero falló el envío de email:", emailErr);
+      }
     }
 
     return Response.json({ ok: true });
@@ -93,42 +102,49 @@ export async function PATCH(req) {
     if (!process.env.ADMIN_SECRET || key !== process.env.ADMIN_SECRET) {
       return Response.json({ error: "No autorizado" }, { status: 401 });
     }
-    const technicians = await getTechnicians();
-    const idx = technicians.findIndex((t) => t.id === id);
-    if (idx === -1) return Response.json({ error: "No encontrado" }, { status: 404 });
 
-    const current = technicians[idx];
-    const merged = { ...current, ...updates };
-
-    // Habilitar/deshabilitar un plan puntual para este técnico (no afecta a nadie más).
-    if (updates.planesHabilitados) {
-      const nuevosHabilitados = { ...(current.planesHabilitados || defaultPlanesHabilitados()), ...updates.planesHabilitados };
-      // El plan gratis nunca se le puede quitar a un técnico.
-      if (!puedeDesactivarsePlan("tecnico", "gratis")) nuevosHabilitados.gratis = true;
-      merged.planesHabilitados = nuevosHabilitados;
-
-      // Si el plan que tenía asignado justo quedó deshabilitado, lo volvemos
-      // a gratis automáticamente (siempre disponible para técnicos).
-      if (nuevosHabilitados[current.plan] === false) {
-        merged.plan = "gratis";
-        merged.subscription = updateSubscriptionPlan(current.subscription, "gratis");
+    let result = { ok: true };
+    await withLock("casaia:technicians", async () => {
+      const technicians = await getTechnicians();
+      const idx = technicians.findIndex((t) => t.id === id);
+      if (idx === -1) {
+        result = { error: "No encontrado", status: 404 };
+        return;
       }
-    }
 
-    // Cambiar el plan actual del técnico: solo si ese plan está habilitado para él.
-    if (updates.plan && updates.plan !== current.plan) {
-      const habilitados = merged.planesHabilitados || current.planesHabilitados || defaultPlanesHabilitados();
-      if (habilitados[updates.plan] === false) {
-        return Response.json(
-          { error: `El plan "${updates.plan}" no está habilitado para este técnico. Habilitalo primero.` },
-          { status: 400 }
-        );
+      const current = technicians[idx];
+      const merged = { ...current, ...updates };
+
+      // Habilitar/deshabilitar un plan puntual para este técnico (no afecta a nadie más).
+      if (updates.planesHabilitados) {
+        const nuevosHabilitados = { ...(current.planesHabilitados || defaultPlanesHabilitados()), ...updates.planesHabilitados };
+        // El plan gratis nunca se le puede quitar a un técnico.
+        if (!puedeDesactivarsePlan("tecnico", "gratis")) nuevosHabilitados.gratis = true;
+        merged.planesHabilitados = nuevosHabilitados;
+
+        // Si el plan que tenía asignado justo quedó deshabilitado, lo volvemos
+        // a gratis automáticamente (siempre disponible para técnicos).
+        if (nuevosHabilitados[current.plan] === false) {
+          merged.plan = "gratis";
+          merged.subscription = updateSubscriptionPlan(current.subscription, "gratis");
+        }
       }
-      merged.subscription = updateSubscriptionPlan(current.subscription, updates.plan);
-    }
 
-    technicians[idx] = merged;
-    await saveTechnicians(technicians);
+      // Cambiar el plan actual del técnico: solo si ese plan está habilitado para él.
+      if (updates.plan && updates.plan !== current.plan) {
+        const habilitados = merged.planesHabilitados || current.planesHabilitados || defaultPlanesHabilitados();
+        if (habilitados[updates.plan] === false) {
+          result = { error: `El plan "${updates.plan}" no está habilitado para este técnico. Habilitalo primero.`, status: 400 };
+          return;
+        }
+        merged.subscription = updateSubscriptionPlan(current.subscription, updates.plan);
+      }
+
+      technicians[idx] = merged;
+      await saveTechnicians(technicians);
+    });
+
+    if (result.error) return Response.json({ error: result.error }, { status: result.status });
     return Response.json({ ok: true });
   } catch (err) {
     console.error(err);
@@ -143,12 +159,19 @@ export async function DELETE(req) {
     if (!process.env.ADMIN_SECRET || key !== process.env.ADMIN_SECRET) {
       return Response.json({ error: "No autorizado" }, { status: 401 });
     }
-    const technicians = await getTechnicians();
-    const filtered = technicians.filter((t) => t.id !== id);
-    if (filtered.length === technicians.length) {
-      return Response.json({ error: "No encontrado" }, { status: 404 });
-    }
-    await saveTechnicians(filtered);
+
+    let result = { ok: true };
+    await withLock("casaia:technicians", async () => {
+      const technicians = await getTechnicians();
+      const filtered = technicians.filter((t) => t.id !== id);
+      if (filtered.length === technicians.length) {
+        result = { error: "No encontrado", status: 404 };
+        return;
+      }
+      await saveTechnicians(filtered);
+    });
+
+    if (result.error) return Response.json({ error: result.error }, { status: result.status });
     return Response.json({ ok: true });
   } catch (err) {
     console.error(err);

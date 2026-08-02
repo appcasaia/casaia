@@ -122,37 +122,54 @@ export async function POST(req) {
     const isUrgent = priority === "ALTA";
     const urgentPrefix = isUrgent ? "🚨 URGENTE — " : "";
 
-    // Siempre se le avisa al administrador.
-    await resend.emails.send({
-      from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
-      to: adminEmail,
-      subject: matches.length
-        ? `${urgentPrefix}Nuevo lead - CasaIA (derivado vía ${sourceLabel}): ${name}`
-        : `${urgentPrefix}Nuevo lead - CasaIA: ${name}`,
-      text: emailBody,
-    });
+    // Los emails son avisos "best effort": si Resend falla (límite diario
+    // alcanzado, dirección inválida, caída puntual), no debe interrumpir el
+    // resto del flujo (WhatsApp sigue siendo un canal aparte) ni mostrarle
+    // un error al huésped — su consulta con la IA ya se resolvió bien, lo
+    // único que podría faltar es el aviso.
+    try {
+      // Siempre se le avisa al administrador.
+      await resend.emails.send({
+        from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
+        to: adminEmail,
+        subject: matches.length
+          ? `${urgentPrefix}Nuevo lead - CasaIA (derivado vía ${sourceLabel}): ${name}`
+          : `${urgentPrefix}Nuevo lead - CasaIA: ${name}`,
+        text: emailBody,
+      });
+    } catch (emailErr) {
+      console.error("Falló el email al administrador (el lead sigue procesándose):", emailErr);
+    }
 
     // Avisar por email a cada contacto derivado que tenga email cargado.
     for (const m of matches) {
       if (m.email) {
-        await resend.emails.send({
-          from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
-          to: m.email,
-          subject: `${urgentPrefix}Nueva consulta derivada por CasaIA: ${name}`,
-          text: emailBody,
-        });
+        try {
+          await resend.emails.send({
+            from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
+            to: m.email,
+            subject: `${urgentPrefix}Nueva consulta derivada por CasaIA: ${name}`,
+            text: emailBody,
+          });
+        } catch (emailErr) {
+          console.error(`Falló el email a ${m.email} (el lead sigue procesándose):`, emailErr);
+        }
       }
     }
 
     // Si es urgente y la consulta vino por el link de una inmobiliaria,
     // avisarle también directamente a ella (además de a sus técnicos y al admin).
     if (isUrgent && agency && agency.email) {
-      await resend.emails.send({
-        from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
-        to: agency.email,
-        subject: `🚨 URGENTE en tu propiedad — CasaIA: ${name}`,
-        text: `Se registró un caso URGENTE en una de tus propiedades gestionadas por CasaIA.\n\n${emailBody}`,
-      });
+      try {
+        await resend.emails.send({
+          from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
+          to: agency.email,
+          subject: `🚨 URGENTE en tu propiedad — CasaIA: ${name}`,
+          text: `Se registró un caso URGENTE en una de tus propiedades gestionadas por CasaIA.\n\n${emailBody}`,
+        });
+      } catch (emailErr) {
+        console.error("Falló el email urgente a la inmobiliaria (el lead sigue procesándose):", emailErr);
+      }
     }
 
     // Avisos por WhatsApp (Meta Cloud API). No hace nada mientras no esté

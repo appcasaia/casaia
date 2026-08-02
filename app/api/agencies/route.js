@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { getAgencies, saveAgencies, slugify, generateEditToken, ensurePropertySlugs } from "../../../lib/agencies";
 import { checkRateLimit, getClientIp } from "../../../lib/rateLimit";
 import { verifyTurnstile } from "../../../lib/turnstile";
+import { withLock } from "../../../lib/lock";
 import { createSubscription, updateSubscriptionPlan, AGENCY_PLAN_LIMITS, defaultPlanesHabilitados } from "../../../lib/subscriptions";
 
 // Registro público de inmobiliarias/administradores de propiedades.
@@ -27,7 +28,6 @@ export async function POST(req) {
       return Response.json({ error: "Faltan datos obligatorios." }, { status: 400 });
     }
 
-    const agencies = await getAgencies();
     const slug = slugify(nombre);
     const editToken = generateEditToken();
 
@@ -58,8 +58,15 @@ export async function POST(req) {
       planesHabilitados: defaultPlanesHabilitados(),
     };
 
-    agencies.push(newAgency);
-    await saveAgencies(agencies);
+    // Todo el ciclo leer-modificar-guardar va adentro del lock: así, si dos
+    // inmobiliarias se registran casi al mismo tiempo, la segunda espera a
+    // que la primera termine de guardar antes de leer la lista — evita que
+    // una pise el registro de la otra.
+    await withLock("casaia:agencies", async () => {
+      const agencies = await getAgencies();
+      agencies.push(newAgency);
+      await saveAgencies(agencies);
+    });
 
     const clientLink = `https://casaia.net/i/${slug}`;
     const editLink = `https://casaia.net/inmobiliarias/editar/${slug}?token=${editToken}`;
@@ -69,27 +76,35 @@ export async function POST(req) {
       link: `https://casaia.net/i/${slug}/${p.slug}`,
     }));
 
+    // El registro YA está guardado en este punto. Si el envío de emails
+    // falla (Resend caído, límite diario alcanzado, dirección inválida),
+    // no debe hacer parecer que el registro entero falló — por eso va en
+    // su propio try/catch, separado del resto.
     if (process.env.RESEND_API_KEY) {
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      const adminEmail = process.env.LEAD_EMAIL_TO || "casaia24h@gmail.com";
-      await resend.emails.send({
-        from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
-        to: adminEmail,
-        subject: `Nueva inmobiliaria registrada en CasaIA: ${nombre}`,
-        text: `Nombre: ${nombre}\nContacto: ${contacto}\nEmail: ${email}\nTeléfono: ${telefono || "-"}\nLocalidades: ${localidades || "-"}\nTécnicos declarados: ${cleanTecnicos.length}\nPropiedades declaradas: ${cleanPropiedades.length}\nLink exclusivo: ${clientLink}`,
-      });
+      try {
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        const adminEmail = process.env.LEAD_EMAIL_TO || "casaia24h@gmail.com";
+        await resend.emails.send({
+          from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
+          to: adminEmail,
+          subject: `Nueva inmobiliaria registrada en CasaIA: ${nombre}`,
+          text: `Nombre: ${nombre}\nContacto: ${contacto}\nEmail: ${email}\nTeléfono: ${telefono || "-"}\nLocalidades: ${localidades || "-"}\nTécnicos declarados: ${cleanTecnicos.length}\nPropiedades declaradas: ${cleanPropiedades.length}\nLink exclusivo: ${clientLink}`,
+        });
 
-      const propertyLinksText = propertyLinks.length
-        ? `\n\nLINKS POR PROPIEDAD (para pegar el QR en la puerta de cada una):\n${propertyLinks.map((p) => `- ${p.nombre}: ${p.link}`).join("\n")}`
-        : "";
+        const propertyLinksText = propertyLinks.length
+          ? `\n\nLINKS POR PROPIEDAD (para pegar el QR en la puerta de cada una):\n${propertyLinks.map((p) => `- ${p.nombre}: ${p.link}`).join("\n")}`
+          : "";
 
-      // Confirmación a la inmobiliaria con su link exclusivo y su link privado de edición.
-      await resend.emails.send({
-        from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
-        to: email,
-        subject: "Tus links de CasaIA están listos",
-        text: `Hola ${contacto},\n\nTu registro en CasaIA fue exitoso. Guardá estos links:\n\n1) LINK GENERAL PARA TUS CLIENTES (compartilo con huéspedes/inquilinos):\n${clientLink}\n\n2) LINK PRIVADO PARA EDITAR TUS DATOS (guardalo solo para vos, te permite modificar tus técnicos y propiedades cuando quieras, sin necesidad de contraseña):\n${editLink}${propertyLinksText}\n\nCuando un cliente entre desde el link general, va a ser atendido por la IA y derivado únicamente a los técnicos de confianza que vos cargaste. Si entra desde el link de una propiedad específica, la IA ya sabe en qué unidad está y responde directo (WiFi, claves, etc), sin preguntar nada de más — ideal para imprimir como QR y pegar en la puerta.\n\nSaludos,\nEquipo CasaIA`,
-      });
+        // Confirmación a la inmobiliaria con su link exclusivo y su link privado de edición.
+        await resend.emails.send({
+          from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
+          to: email,
+          subject: "Tus links de CasaIA están listos",
+          text: `Hola ${contacto},\n\nTu registro en CasaIA fue exitoso. Guardá estos links:\n\n1) LINK GENERAL PARA TUS CLIENTES (compartilo con huéspedes/inquilinos):\n${clientLink}\n\n2) LINK PRIVADO PARA EDITAR TUS DATOS (guardalo solo para vos, te permite modificar tus técnicos y propiedades cuando quieras, sin necesidad de contraseña):\n${editLink}${propertyLinksText}\n\nCuando un cliente entre desde el link general, va a ser atendido por la IA y derivado únicamente a los técnicos de confianza que vos cargaste. Si entra desde el link de una propiedad específica, la IA ya sabe en qué unidad está y responde directo (WiFi, claves, etc), sin preguntar nada de más — ideal para imprimir como QR y pegar en la puerta.\n\nSaludos,\nEquipo CasaIA`,
+        });
+      } catch (emailErr) {
+        console.error("El registro se guardó bien, pero falló el envío de email:", emailErr);
+      }
     }
 
     return Response.json({ ok: true, slug, link: clientLink, editLink, properties: propertyLinks });
@@ -117,36 +132,42 @@ export async function PATCH(req) {
     if (!process.env.ADMIN_SECRET || key !== process.env.ADMIN_SECRET) {
       return Response.json({ error: "No autorizado" }, { status: 401 });
     }
-    const agencies = await getAgencies();
-    const idx = agencies.findIndex((a) => a.id === id);
-    if (idx === -1) return Response.json({ error: "No encontrado" }, { status: 404 });
-
-    const current = agencies[idx];
-    const merged = { ...current, ...updates };
-
-    // Habilitar/deshabilitar un plan puntual para esta inmobiliaria (no afecta a nadie más).
-    // A diferencia de los técnicos, acá SÍ se puede desactivar el plan gratis —
-    // es justamente lo que se usa para pedirle que se suscriba cuando arranque el cobro.
-    if (updates.planesHabilitados) {
-      merged.planesHabilitados = { ...(current.planesHabilitados || defaultPlanesHabilitados()), ...updates.planesHabilitados };
-      // Si el plan que tiene asignado ahora queda deshabilitado, no la cambiamos
-      // de plan automáticamente: queda "bloqueada" hasta que el admin la reactive
-      // o le habilite otro plan. Eso dispara el aviso de suscripción en su panel.
-    }
-
-    if (updates.plan && updates.plan !== current.plan) {
-      const habilitados = merged.planesHabilitados || current.planesHabilitados || defaultPlanesHabilitados();
-      if (habilitados[updates.plan] === false) {
-        return Response.json(
-          { error: `El plan "${updates.plan}" no está habilitado para esta inmobiliaria. Habilitalo primero.` },
-          { status: 400 }
-        );
+    let result = { ok: true };
+    await withLock("casaia:agencies", async () => {
+      const agencies = await getAgencies();
+      const idx = agencies.findIndex((a) => a.id === id);
+      if (idx === -1) {
+        result = { error: "No encontrado", status: 404 };
+        return;
       }
-      merged.subscription = updateSubscriptionPlan(current.subscription, updates.plan);
-    }
 
-    agencies[idx] = merged;
-    await saveAgencies(agencies);
+      const current = agencies[idx];
+      const merged = { ...current, ...updates };
+
+      // Habilitar/deshabilitar un plan puntual para esta inmobiliaria (no afecta a nadie más).
+      // A diferencia de los técnicos, acá SÍ se puede desactivar el plan gratis —
+      // es justamente lo que se usa para pedirle que se suscriba cuando arranque el cobro.
+      if (updates.planesHabilitados) {
+        merged.planesHabilitados = { ...(current.planesHabilitados || defaultPlanesHabilitados()), ...updates.planesHabilitados };
+        // Si el plan que tiene asignado ahora queda deshabilitado, no la cambiamos
+        // de plan automáticamente: queda "bloqueada" hasta que el admin la reactive
+        // o le habilite otro plan. Eso dispara el aviso de suscripción en su panel.
+      }
+
+      if (updates.plan && updates.plan !== current.plan) {
+        const habilitados = merged.planesHabilitados || current.planesHabilitados || defaultPlanesHabilitados();
+        if (habilitados[updates.plan] === false) {
+          result = { error: `El plan "${updates.plan}" no está habilitado para esta inmobiliaria. Habilitalo primero.`, status: 400 };
+          return;
+        }
+        merged.subscription = updateSubscriptionPlan(current.subscription, updates.plan);
+      }
+
+      agencies[idx] = merged;
+      await saveAgencies(agencies);
+    });
+
+    if (result.error) return Response.json({ error: result.error }, { status: result.status });
     return Response.json({ ok: true });
   } catch (err) {
     console.error(err);
@@ -161,12 +182,18 @@ export async function DELETE(req) {
     if (!process.env.ADMIN_SECRET || key !== process.env.ADMIN_SECRET) {
       return Response.json({ error: "No autorizado" }, { status: 401 });
     }
-    const agencies = await getAgencies();
-    const filtered = agencies.filter((a) => a.id !== id);
-    if (filtered.length === agencies.length) {
-      return Response.json({ error: "No encontrado" }, { status: 404 });
-    }
-    await saveAgencies(filtered);
+    let result = { ok: true };
+    await withLock("casaia:agencies", async () => {
+      const agencies = await getAgencies();
+      const filtered = agencies.filter((a) => a.id !== id);
+      if (filtered.length === agencies.length) {
+        result = { error: "No encontrado", status: 404 };
+        return;
+      }
+      await saveAgencies(filtered);
+    });
+
+    if (result.error) return Response.json({ error: result.error }, { status: result.status });
     return Response.json({ ok: true });
   } catch (err) {
     console.error(err);
