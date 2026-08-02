@@ -118,8 +118,7 @@ export default function SobrePage() {
       <header>
         <div className="container header-content">
           <div className="logo">
-            <Image src="/images/logo-casaia.png" alt="CasaIA" width={72} height={80} />
-            Casa<span>IA</span>
+            <Image src="/images/logo-casaia-full.png" alt="CasaIA" width={182} height={125} priority />
           </div>
         </div>
       </header>

@@ -47,9 +47,8 @@
 /* ---------- Header ---------- */
 .sobre header { background: var(--navy); padding: 26px 0; }
 .sobre .header-content { display: flex; justify-content: space-between; align-items: center; }
-.sobre .logo { font-family: "Roboto Slab", serif; font-size: 40px; font-weight: 700; color: white; display: flex; align-items: center; gap: 12px; letter-spacing: -.01em; }
-.sobre .logo img { height: 44px; width: auto; }
-.sobre .logo span { color: var(--orange); }
+.sobre .logo { display: flex; align-items: center; }
+.sobre .logo img { height: 78px; width: auto; }
 
 /* ---------- Botones ---------- */
 .sobre .btn {
@@ -199,6 +198,5 @@
   .sobre .section { padding: 64px 0; }
   .sobre .section-title { font-size: 29px; margin-bottom: 40px; }
   .sobre .cta h2 { font-size: 30px; }
-  .sobre .logo { font-size: 32px; }
-  .sobre .logo img { height: 36px; }
+  .sobre .logo img { height: 58px; }
 }
