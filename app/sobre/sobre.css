@@ -198,5 +198,7 @@
   .sobre .section { padding: 64px 0; }
   .sobre .section-title { font-size: 29px; margin-bottom: 40px; }
   .sobre .cta h2 { font-size: 30px; }
-  .sobre .logo img { height: 66px; }
+  .sobre .logo img { height: 220px; }
+  .sobre header { padding: 14px 0; }
+  .sobre .header-content { justify-content: center; }
 }
