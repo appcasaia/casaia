@@ -48,7 +48,7 @@
 .sobre header { background: var(--navy); padding: 26px 0; }
 .sobre .header-content { display: flex; justify-content: space-between; align-items: center; }
 .sobre .logo { display: flex; align-items: center; }
-.sobre .logo img { height: 78px; width: auto; }
+.sobre .logo img { height: 92px; width: auto; }
 
 /* ---------- Botones ---------- */
 .sobre .btn {
@@ -198,5 +198,5 @@
   .sobre .section { padding: 64px 0; }
   .sobre .section-title { font-size: 29px; margin-bottom: 40px; }
   .sobre .cta h2 { font-size: 30px; }
-  .sobre .logo img { height: 58px; }
+  .sobre .logo img { height: 66px; }
 }

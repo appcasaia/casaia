@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { headers } from "next/headers";
-import { Building2, Wrench, Store, Home, MessageCircle, Zap, Mail, Globe2, Check, FileText, QrCode } from "lucide-react";
+import { Building2, Wrench, Store, Home, MessageCircle, Zap, Mail, Globe2, Check, FileText } from "lucide-react";
 import "./sobre.css";
 
 // Detecta el idioma preferido del navegador/celular (header Accept-Language)
@@ -118,7 +118,7 @@ export default function SobrePage() {
       <header>
         <div className="container header-content">
           <div className="logo">
-            <Image src="/images/logo-casaia-full.png" alt="CasaIA" width={182} height={125} priority />
+            <Image src="/images/logo-casaia-card.png" alt="CasaIA" width={198} height={140} priority />
           </div>
         </div>
       </header>
@@ -127,10 +127,6 @@ export default function SobrePage() {
         <div className="hero-bg-dots" aria-hidden="true" />
         <div className="container hero-grid">
           <div>
-            <div className="tag">
-              <QrCode size={13} />
-              {c.heroEyebrow}
-            </div>
             <h1>
               {c.heroTitle[0]}
               <br />
