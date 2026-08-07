@@ -23,6 +23,8 @@ import {
   BadgeCheck,
   Store,
   Ticket,
+  Globe,
+  Info,
 } from "lucide-react";
 
 const T = {
@@ -1372,31 +1374,69 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                               </span>
                             </div>
                           )}
+                          {ref.viaWeb && (
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 4,
+                                padding: "3px 10px",
+                                borderRadius: 999,
+                                background: "transparent",
+                                border: "1px dashed #7A6E58",
+                              }}
+                            >
+                              <Info size={12} color="#B9AF97" />
+                              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#B9AF97", textTransform: "uppercase" }}>
+                                Resultado de internet, no verificado
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-                            <a
-                              href={`tel:${ref.telefono}`}
-                              style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", background: "#2A3A36", padding: "8px 14px", borderRadius: 999 }}
-                            >
-                              <Phone size={14} color="#7FA893" />
-                              <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#F3EDE2", fontWeight: 600 }}>
-                                {ref.telefono}
-                              </span>
-                            </a>
-                            <a
-                              href={`https://wa.me/${ref.telefono.replace(/\D/g, "")}?text=${encodeURIComponent(
-                                ({ es: "¡Hola! Vengo de CasaIA. ", pt: "Olá! Vim do CasaIA. ", en: "Hi! I came from CasaIA. ", fr: "Bonjour ! Je viens de CasaIA. ", de: "Hallo! Ich komme von CasaIA. " }[lang] || "Hi! I came from CasaIA. ") +
-                                  (messages.find((m) => m.role === "user")?.text || "")
-                              )}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", background: "#C4622A", padding: "8px 14px", borderRadius: 999 }}
-                            >
-                              <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#FFFFFF", fontWeight: 600 }}>
-                                WhatsApp
-                              </span>
-                            </a>
+                            {ref.telefono ? (
+                              <>
+                                <a
+                                  href={`tel:${ref.telefono}`}
+                                  style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", background: "#2A3A36", padding: "8px 14px", borderRadius: 999 }}
+                                >
+                                  <Phone size={14} color="#7FA893" />
+                                  <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#F3EDE2", fontWeight: 600 }}>
+                                    {ref.telefono}
+                                  </span>
+                                </a>
+                                {!ref.viaWeb && (
+                                  <a
+                                    href={`https://wa.me/${ref.telefono.replace(/\D/g, "")}?text=${encodeURIComponent(
+                                      ({ es: "¡Hola! Vengo de CasaIA. ", pt: "Olá! Vim do CasaIA. ", en: "Hi! I came from CasaIA. ", fr: "Bonjour ! Je viens de CasaIA. ", de: "Hallo! Ich komme von CasaIA. " }[lang] || "Hi! I came from CasaIA. ") +
+                                        (messages.find((m) => m.role === "user")?.text || "")
+                                    )}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", background: "#C4622A", padding: "8px 14px", borderRadius: 999 }}
+                                  >
+                                    <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#FFFFFF", fontWeight: 600 }}>
+                                      WhatsApp
+                                    </span>
+                                  </a>
+                                )}
+                              </>
+                            ) : ref.viaWeb && ref.mapsQuery ? (
+                              // Sin teléfono confirmado por la búsqueda: mejor un link directo a
+                              // Google Maps (siempre exacto) que arriesgar un número mal encontrado.
+                              <a
+                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ref.mapsQuery)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", background: "#2A3A36", padding: "8px 14px", borderRadius: 999 }}
+                              >
+                                <Globe size={14} color="#7FA893" />
+                                <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#F3EDE2", fontWeight: 600 }}>
+                                  Buscar en Google Maps
+                                </span>
+                              </a>
+                            ) : null}
                           </div>
                           {ref.direccion && (
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

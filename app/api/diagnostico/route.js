@@ -110,13 +110,20 @@ ${
 ${list}
 
 Reglas para usar esta lista:
-- Si el huésped pregunta dónde comer, dónde hay una farmacia, mercado, panadería, lavandería, o transporte, recomendá los de esta lista que coincidan con la categoría preguntada (nombre, dirección y teléfono si lo tiene).
-- Si preguntan por una categoría que no está en la lista, decilo con honestidad ("no tengo un comercio de ese tipo cargado en tu zona") y no inventes ningún lugar ni recomendación genérica de internet.
+- Si el huésped pregunta dónde comer, dónde hay una farmacia, mercado, panadería, lavandería, o transporte, recomendá PRIMERO los de esta lista que coincidan con la categoría preguntada (nombre, dirección y teléfono si lo tiene) — son la red verificada de CasaIA.
 - No hace falta que muestres todos los que coinciden, con 2-3 buenas opciones alcanza salvo que pidan más.
-- Si alguno de los comercios que recomendás tiene "DESCUENTO PARA HUÉSPEDES CASAIA" cargado, mencionáselo al huésped como parte de tu respuesta (ej: "de paso, tienen un descuento para huéspedes de CasaIA: ...").`;
+- Si alguno de los comercios que recomendás tiene "DESCUENTO PARA HUÉSPEDES CASAIA" cargado, mencionáselo al huésped como parte de tu respuesta (ej: "de paso, tienen un descuento para huéspedes de CasaIA: ...").
+- Si preguntan por una categoría que NO está en esta lista, seguí las instrucciones de "SIN COMERCIOS REGISTRADOS PARA ESA CATEGORÍA" más abajo.`;
   }
 
-  return `${BASE_SYSTEM_PROMPT}\n\n${instruction}${emergencyBlock}${propertiesBlock}${comerciosBlock}`;
+  const busquedaWebComerciosBlock = `\n\nSIN COMERCIOS REGISTRADOS PARA ESA CATEGORÍA (o sin ninguno cargado en la zona todavía):
+Cuando el huésped pregunte por algo práctico de la zona (dónde comer, farmacia, mercado, lo que sea) y no tengas un comercio cargado por CasaIA que lo cubra, usá la herramienta de búsqueda web para buscar 2-3 opciones reales cerca de la zona/dirección del huésped, y respondé con esa información (nombre y, si lo encontrás, dirección u horario).
+Reglas importantes para esto:
+- SIEMPRE aclará que son resultados generales de internet, no parte de la red verificada de CasaIA (ej: "no tengo un comercio con descuento cargado para eso, pero encontré esto buscando en internet:" y después la lista).
+- No inventes NUNCA un lugar, dirección o teléfono que no hayas confirmado con la búsqueda — si la búsqueda no trae nada confiable, decilo con honestidad en vez de inventar.
+- No repitas la búsqueda web para la misma pregunta si ya la hiciste en un mensaje anterior de esta conversación.`;
+
+  return `${BASE_SYSTEM_PROMPT}\n\n${instruction}${emergencyBlock}${propertiesBlock}${comerciosBlock}${busquedaWebComerciosBlock}`;
 }
 
 export async function POST(req) {

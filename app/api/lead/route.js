@@ -8,6 +8,7 @@ import { verifyTurnstile } from "../../../lib/turnstile";
 import { TECHNICIAN_PLAN_LIMITS } from "../../../lib/subscriptions";
 import { labelCategoria } from "../../../lib/categorias";
 import { sendWhatsAppTemplate } from "../../../lib/whatsapp";
+import { findTechnicianViaWeb } from "../../../lib/webFallback";
 
 export async function POST(req) {
   try {
@@ -115,6 +116,21 @@ export async function POST(req) {
       }
     }
 
+    // Último recurso: si no hay NINGÚN técnico ni comercio referido de
+    // CasaIA para esta zona/categoría, buscamos en la web para no dejar
+    // al huésped sin ninguna opción. Estos resultados quedan marcados
+    // `viaWeb: true` — nunca les mandamos WhatsApp/email en nombre de
+    // CasaIA (no tenemos relación con ellos), y en la pantalla del
+    // huésped se muestran con una aclaración de que no son la red
+    // verificada, para no generar una falsa sensación de garantía.
+    if (matches.length === 0) {
+      const viaWeb = await findTechnicianViaWeb({ categoria, zone: propertyName || zone });
+      if (viaWeb.length) {
+        matches = viaWeb;
+        sourceLabel = "búsqueda web (sin técnico registrado en la zona)";
+      }
+    }
+
     const resend = new Resend(process.env.RESEND_API_KEY);
     const priorityLine = priority ? `Prioridad: ${priority}${emergency ? " (activado por botón de emergencia)" : ""}\n` : "";
     const propertyLine = propertyName ? `Propiedad: ${propertyName}\n` : "";
@@ -142,8 +158,13 @@ export async function POST(req) {
     }
 
     // Avisar por email a cada contacto derivado que tenga email cargado.
+    // Los resultados "viaWeb" (sin técnico registrado, encontrados por
+    // búsqueda) NUNCA reciben notificación automática — no tenemos
+    // ninguna relación con ese negocio, no correspondería avisarles en
+    // nombre de CasaIA. Solo se los mostramos al huésped para que los
+    // contacte él mismo si quiere.
     for (const m of matches) {
-      if (m.email) {
+      if (m.email && !m.viaWeb) {
         try {
           await resend.emails.send({
             from: process.env.LEAD_EMAIL_FROM || "notificaciones@casaia.net",
@@ -181,7 +202,7 @@ export async function POST(req) {
     // queda ilegible en un mensaje corto de WhatsApp.
     const resumenCorto = (clientSummary || summary || "").slice(0, 300);
     for (const m of matches) {
-      if (m.telefono) {
+      if (m.telefono && !m.viaWeb) {
         await sendWhatsAppTemplate({
           to: m.telefono,
           templateName: "nuevo_lead_casaia",
