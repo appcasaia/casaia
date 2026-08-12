@@ -374,14 +374,14 @@ function generarCodigoCupom() {
 
 const LogoMark = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-    <path d="M 45 105 L 100 55 L 155 105" fill="none" stroke="#F3EDE2" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M 60 98 L 60 148 L 140 148 L 140 98" fill="none" stroke="#F3EDE2" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
-    <rect x="88" y="118" width="24" height="30" rx="2" fill="#F3EDE2" />
-    <circle cx="100" cy="55" r="9" fill="#C4622A" />
-    <circle cx="128" cy="36" r="6" fill="#C4622A" />
-    <circle cx="72" cy="36" r="6" fill="#C4622A" />
-    <line x1="100" y1="55" x2="128" y2="36" stroke="#C4622A" strokeWidth="4" strokeLinecap="round" />
-    <line x1="100" y1="55" x2="72" y2="36" stroke="#C4622A" strokeWidth="4" strokeLinecap="round" />
+    <path d="M 45 105 L 100 55 L 155 105" fill="none" stroke="#FAF6EE" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M 60 98 L 60 148 L 140 148 L 140 98" fill="none" stroke="#FAF6EE" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+    <rect x="88" y="118" width="24" height="30" rx="2" fill="#FAF6EE" />
+    <circle cx="100" cy="55" r="9" fill="#F58220" />
+    <circle cx="128" cy="36" r="6" fill="#F58220" />
+    <circle cx="72" cy="36" r="6" fill="#F58220" />
+    <line x1="100" y1="55" x2="128" y2="36" stroke="#F58220" strokeWidth="4" strokeLinecap="round" />
+    <line x1="100" y1="55" x2="72" y2="36" stroke="#F58220" strokeWidth="4" strokeLinecap="round" />
   </svg>
 );
 
@@ -776,12 +776,12 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
         width: 30,
         height: 30,
         borderRadius: "50%",
-        background: "#2A3A36",
+        background: "#061F3B",
         border: "none",
         flexShrink: 0,
       }}
     >
-      <History size={15} color="#7FA893" />
+      <History size={15} color="#8FB0D6" />
     </button>
   );
 
@@ -794,9 +794,9 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
         gap: 6,
         padding: "6px 12px",
         borderRadius: 999,
-        background: "#2A3A36",
+        background: "#061F3B",
         border: "none",
-        color: "#CFE0D6",
+        color: "#FCEEDD",
         fontFamily: "Inter, sans-serif",
         fontSize: 12,
         fontWeight: 600,
@@ -818,18 +818,18 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
           position: "relative",
           width: "min(320px, 84vw)",
           height: "100%",
-          background: "#F3EDE2",
+          background: "#FAF6EE",
           padding: "20px 16px",
           overflowY: "auto",
           boxShadow: "4px 0 24px rgba(0,0,0,0.15)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-          <span style={{ fontFamily: "'Roboto Slab', serif", fontSize: 17, fontWeight: 700, color: "#1F2D2B" }}>
+          <span style={{ fontFamily: "'Roboto Slab', serif", fontSize: 17, fontWeight: 700, color: "#082B52" }}>
             {t.history}
           </span>
           <button onClick={() => setShowHistory(false)} aria-label="Cerrar" style={{ border: "none", background: "transparent" }}>
-            <X size={18} color="#5B7065" />
+            <X size={18} color="#5B6B84" />
           </button>
         </div>
 
@@ -843,7 +843,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
             padding: "10px 14px",
             borderRadius: 10,
             border: "none",
-            background: "#C4622A",
+            background: "#F58220",
             color: "#FFFFFF",
             fontFamily: "Inter, sans-serif",
             fontWeight: 600,
@@ -855,7 +855,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
         </button>
 
         {conversations.length === 0 && (
-          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#8A7A5C" }}>{t.historyEmpty}</p>
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#6E89AC" }}>{t.historyEmpty}</p>
         )}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -867,15 +867,15 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                 textAlign: "left",
                 padding: "10px 12px",
                 borderRadius: 10,
-                border: conv.id === activeConvIdRef.current ? "1px solid #C4622A" : "1px solid #E9E2D2",
+                border: conv.id === activeConvIdRef.current ? "1px solid #F58220" : "1px solid #F1EADC",
                 background: "#FFFFFF",
                 cursor: "pointer",
               }}
             >
-              <div style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#2A332F", marginBottom: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <div style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#061F3B", marginBottom: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {conv.preview}
               </div>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#8A7A5C" }}>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#6E89AC" }}>
                 {formatHistoryDate(conv.date)}
               </div>
             </button>
@@ -892,7 +892,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
           <img
             src={image.dataUrl}
             alt="adjunto"
-            style={{ height: 64, width: 64, objectFit: "cover", borderRadius: 10, border: "1px solid #E0D8C7" }}
+            style={{ height: 64, width: 64, objectFit: "cover", borderRadius: 10, border: "1px solid #D6DEE8" }}
           />
           <button
             onClick={removeImage}
@@ -907,11 +907,11 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background: "#1F2D2B",
+              background: "#082B52",
               border: "none",
             }}
           >
-            <X size={12} color="#F3EDE2" />
+            <X size={12} color="#FAF6EE" />
           </button>
         </div>
       )}
@@ -922,7 +922,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
           title={t.takePhoto}
           style={iconBtnStyle}
         >
-          <Camera size={17} color="#5B7065" />
+          <Camera size={17} color="#5B6B84" />
         </button>
         <input
           ref={cameraInputRef}
@@ -938,7 +938,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
           title={t.gallery}
           style={iconBtnStyle}
         >
-          <ImageIcon size={17} color="#5B7065" />
+          <ImageIcon size={17} color="#5B6B84" />
         </button>
         <input
           ref={galleryInputRef}
@@ -953,10 +953,10 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
           title="Grabar audio"
           style={{
             ...iconBtnStyle,
-            background: recording ? "#C4622A" : "#F3EDE2",
+            background: recording ? "#F58220" : "#FAF6EE",
           }}
         >
-          {recording ? <Square size={15} color="#FFFFFF" /> : <Mic size={17} color="#5B7065" />}
+          {recording ? <Square size={15} color="#FFFFFF" /> : <Mic size={17} color="#5B6B84" />}
         </button>
         <textarea
           value={input}
@@ -975,11 +975,11 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
             borderRadius: 16,
             padding: "10px 16px",
             outline: "none",
-            background: "#F8F5EE",
-            border: recording ? "1px solid #C4622A" : "1px solid #E0D8C7",
+            background: "#FAF6EE",
+            border: recording ? "1px solid #F58220" : "1px solid #D6DEE8",
             fontFamily: "Inter, sans-serif",
             fontSize: 14,
-            color: "#1F2D2B",
+            color: "#082B52",
             maxHeight: 96,
           }}
         />
@@ -995,7 +995,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
-            background: "#C4622A",
+            background: "#F58220",
             border: "none",
             opacity: loading || (!input.trim() && !image) ? 0.4 : 1,
           }}
@@ -1009,7 +1009,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
   // ---------- Pantalla de bienvenida (antes del primer mensaje) ----------
   if (!hasStarted) {
     return (
-      <div style={{ height: "100dvh", width: "100%", display: "flex", flexDirection: "column", background: "#F3EDE2", overflowY: "auto" }}>
+      <div style={{ height: "100dvh", width: "100%", display: "flex", flexDirection: "column", background: "#FAF6EE", overflowY: "auto" }}>
         {historyDrawer}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "16px 20px" }}>
           {conversations.length > 0 ? historyButton : <div />}
@@ -1022,7 +1022,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
               width: 96,
               height: 96,
               borderRadius: "50%",
-              background: "#1F2D2B",
+              background: "#082B52",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -1031,13 +1031,13 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
           >
             <LogoMark size={64} />
           </div>
-          <h1 style={{ fontFamily: "'Roboto Slab', serif", color: "#1F2D2B", fontSize: 40, fontWeight: 700, margin: 0, textAlign: "center" }}>
+          <h1 style={{ fontFamily: "'Roboto Slab', serif", color: "#082B52", fontSize: 40, fontWeight: 700, margin: 0, textAlign: "center" }}>
             CasaIA
           </h1>
-          <p style={{ fontFamily: "Inter, sans-serif", color: "#5B7065", fontSize: 16, marginTop: 8, marginBottom: 4, textAlign: "center" }}>
+          <p style={{ fontFamily: "Inter, sans-serif", color: "#5B6B84", fontSize: 16, marginTop: 8, marginBottom: 4, textAlign: "center" }}>
             {agencyName ? (lang === "pt" ? `Recomendado por ${agencyName}` : `Recomendado por ${agencyName}`) : t.subtitle}
           </p>
-          <p style={{ fontFamily: "'IBM Plex Mono', monospace", color: "#8A7A5C", fontSize: 12, marginBottom: 36, textAlign: "center" }}>
+          <p style={{ fontFamily: "'IBM Plex Mono', monospace", color: "#6E89AC", fontSize: 12, marginBottom: 36, textAlign: "center" }}>
             {t.heroHint}
           </p>
 
@@ -1048,7 +1048,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
             </div>
           )}
 
-          <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "#8A7A5C", marginBottom: 8, textAlign: "center", maxWidth: 400 }}>
+          <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "#6E89AC", marginBottom: 8, textAlign: "center", maxWidth: 400 }}>
             {t.emergencyHint}
           </p>
           <button
@@ -1080,7 +1080,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                 marginTop: 28,
                 padding: "16px 20px 20px",
                 borderRadius: 16,
-                border: "1px solid #E0D8C7",
+                border: "1px solid #D6DEE8",
                 background: "rgba(255,255,255,0.4)",
                 maxWidth: 640,
                 width: "100%",
@@ -1094,7 +1094,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                   fontSize: 11.5,
                   letterSpacing: 0.5,
                   textTransform: "uppercase",
-                  color: "#8A7A5C",
+                  color: "#6E89AC",
                 }}
               >
                 {t.bizTitle}
@@ -1104,7 +1104,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                   href="/tecnicos/registro"
                   style={{
                     display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 999,
-                    border: "1px solid #C4B896", background: "transparent", color: "#5B7065",
+                    border: "1px solid #9FB3CC", background: "transparent", color: "#5B6B84",
                     fontFamily: "Inter, sans-serif", fontSize: 12.5, fontWeight: 600, textDecoration: "none",
                   }}
                 >
@@ -1114,7 +1114,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                   href="/inmobiliarias/registro"
                   style={{
                     display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 999,
-                    border: "1px solid #C4B896", background: "transparent", color: "#5B7065",
+                    border: "1px solid #9FB3CC", background: "transparent", color: "#5B6B84",
                     fontFamily: "Inter, sans-serif", fontSize: 12.5, fontWeight: 600, textDecoration: "none",
                   }}
                 >
@@ -1124,7 +1124,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                   href="/comercios/registro"
                   style={{
                     display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 999,
-                    border: "1px solid #C4B896", background: "transparent", color: "#5B7065",
+                    border: "1px solid #9FB3CC", background: "transparent", color: "#5B6B84",
                     fontFamily: "Inter, sans-serif", fontSize: 12.5, fontWeight: 600, textDecoration: "none",
                   }}
                 >
@@ -1141,7 +1141,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
               alignItems: "center",
               gap: 6,
               marginTop: 18,
-              color: "#8A7A5C",
+              color: "#6E89AC",
               fontFamily: "Inter, sans-serif",
               fontSize: 11.5,
               textDecoration: "none",
@@ -1158,7 +1158,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
 
   // ---------- Vista de conversación ----------
   return (
-    <div style={{ height: "100dvh", width: "100%", display: "flex", flexDirection: "column", background: "#F3EDE2", overflow: "hidden" }}>
+    <div style={{ height: "100dvh", width: "100%", display: "flex", flexDirection: "column", background: "#FAF6EE", overflow: "hidden" }}>
       {historyDrawer}
       <header
         style={{
@@ -1169,8 +1169,8 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
           flexWrap: "wrap",
           rowGap: 10,
           padding: "14px 20px",
-          background: "#1F2D2B",
-          borderBottom: "1px solid #12201D",
+          background: "#082B52",
+          borderBottom: "1px solid #061F3B",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -1182,7 +1182,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background: "#1F2D2B",
+              background: "#082B52",
               flexShrink: 0,
               overflow: "hidden",
             }}
@@ -1190,10 +1190,10 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
             <LogoMark size={32} />
           </div>
           <div>
-            <div style={{ fontFamily: "'Roboto Slab', serif", color: "#F3EDE2", fontSize: 20, fontWeight: 700 }}>
+            <div style={{ fontFamily: "'Roboto Slab', serif", color: "#FAF6EE", fontSize: 20, fontWeight: 700 }}>
               CasaIA
             </div>
-            <div className="casaia-header-sub" style={{ fontFamily: "'IBM Plex Mono', monospace", color: "#9FB3A9", fontSize: 11 }}>
+            <div className="casaia-header-sub" style={{ fontFamily: "'IBM Plex Mono', monospace", color: "#A9BFD6", fontSize: 11 }}>
               {agencyName ? `Recomendado por ${agencyName}` : t.subtitle}
             </div>
           </div>
@@ -1222,9 +1222,9 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
           {langSwitcher}
           {historyButton}
           {newChatButton}
-          <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 999, background: "#2A3A36" }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: loading ? "#C4622A" : "#7FA893" }} />
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", color: "#CFE0D6", fontSize: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 999, background: "#061F3B" }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: loading ? "#F58220" : "#8FB0D6" }} />
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", color: "#FCEEDD", fontSize: 10 }}>
               {loading ? t.analyzing : t.online}
             </span>
           </div>
@@ -1238,9 +1238,9 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
           ))}
 
           {loading && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, alignSelf: "flex-start", padding: "12px 16px", borderRadius: 16, background: "#E6DFCF" }}>
-              <Loader2 size={14} className="spin" color="#5B7065" />
-              <span style={{ fontFamily: "'IBM Plex Mono', monospace", color: "#5B7065", fontSize: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, alignSelf: "flex-start", padding: "12px 16px", borderRadius: 16, background: "#F1EADC" }}>
+              <Loader2 size={14} className="spin" color="#5B6B84" />
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", color: "#5B6B84", fontSize: 12 }}>
                 {t.reviewing}
               </span>
             </div>
@@ -1254,14 +1254,14 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
           )}
 
           {showLeadForm && !leadSent && (
-            <div style={{ alignSelf: "flex-start", maxWidth: "90%", padding: 16, borderRadius: 16, background: casePriority === "ALTA" ? "#FBEAE4" : "#FFFFFF", border: casePriority === "ALTA" ? "1px solid #B5401F" : "1px solid #E9E2D2" }}>
+            <div style={{ alignSelf: "flex-start", maxWidth: "90%", padding: 16, borderRadius: 16, background: casePriority === "ALTA" ? "#FBEAE4" : "#FFFFFF", border: casePriority === "ALTA" ? "1px solid #B5401F" : "1px solid #F1EADC" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-                {casePriority === "ALTA" ? <Siren size={14} color="#B5401F" /> : <Phone size={14} color="#C4622A" />}
-                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: casePriority === "ALTA" ? "#B5401F" : "#C4622A", fontWeight: casePriority === "ALTA" ? 700 : 400 }}>
+                {casePriority === "ALTA" ? <Siren size={14} color="#B5401F" /> : <Phone size={14} color="#F58220" />}
+                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: casePriority === "ALTA" ? "#B5401F" : "#F58220", fontWeight: casePriority === "ALTA" ? 700 : 400 }}>
                   {casePriority === "ALTA" ? t.priorityAlta + " — " + t.visitTitle : t.visitTitle}
                 </span>
               </div>
-              <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#2A332F", marginTop: 0 }}>
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#061F3B", marginTop: 0 }}>
                 {t.visitDesc}
               </p>
               <input
@@ -1292,7 +1292,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                   padding: "10px 0",
                   borderRadius: 10,
                   border: "none",
-                  background: "#C4622A",
+                  background: "#F58220",
                   color: "#FFFFFF",
                   fontFamily: "Inter, sans-serif",
                   fontWeight: 600,
@@ -1313,23 +1313,23 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                 maxWidth: "94%",
                 padding: 22,
                 borderRadius: 18,
-                background: leadResult.referrals?.length ? (casePriority === "ALTA" ? "#B5401F" : "#1F2D2B") : "#E5EFE8",
-                border: leadResult.referrals?.length ? "none" : "1px solid #7FA893",
+                background: leadResult.referrals?.length ? (casePriority === "ALTA" ? "#B5401F" : "#082B52") : "#E5EFE8",
+                border: leadResult.referrals?.length ? "none" : "1px solid #8FB0D6",
               }}
             >
               {leadResult.referrals?.length ? (
                 <>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                    {casePriority === "ALTA" ? <Siren size={18} color="#FFD9CC" /> : <Phone size={18} color="#C4622A" />}
-                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: casePriority === "ALTA" ? "#FFD9CC" : "#C4622A", letterSpacing: 0.3, fontWeight: casePriority === "ALTA" ? 700 : 400 }}>
+                    {casePriority === "ALTA" ? <Siren size={18} color="#FFD9CC" /> : <Phone size={18} color="#F58220" />}
+                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: casePriority === "ALTA" ? "#FFD9CC" : "#F58220", letterSpacing: 0.3, fontWeight: casePriority === "ALTA" ? 700 : 400 }}>
                       {casePriority === "ALTA" ? t.priorityAlta + " — " + t.referralTitle : t.referralTitle}
                     </span>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
                     {leadResult.referrals.map((ref, i) => (
-                      <div key={i} style={{ paddingTop: i > 0 ? 16 : 0, borderTop: i > 0 ? "1px solid #2A3A36" : "none" }}>
+                      <div key={i} style={{ paddingTop: i > 0 ? 16 : 0, borderTop: i > 0 ? "1px solid #061F3B" : "none" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
-                          <div style={{ fontFamily: "'Roboto Slab', serif", fontSize: 22, fontWeight: 700, color: "#F3EDE2" }}>
+                          <div style={{ fontFamily: "'Roboto Slab', serif", fontSize: 22, fontWeight: 700, color: "#FAF6EE" }}>
                             {ref.nombre}
                           </div>
                           {ref.deLaPropiedad && (
@@ -1340,7 +1340,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                                 gap: 4,
                                 padding: "3px 10px",
                                 borderRadius: 999,
-                                background: "#C4622A",
+                                background: "#F58220",
                               }}
                             >
                               <BadgeCheck size={13} color="#FFFFFF" />
@@ -1357,16 +1357,16 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                                 gap: 4,
                                 padding: "3px 10px",
                                 borderRadius: 999,
-                                background: ref.destacado ? "#C4622A" : "#2A3A36",
-                                border: ref.destacado ? "none" : "1px solid #7FA893",
+                                background: ref.destacado ? "#F58220" : "#061F3B",
+                                border: ref.destacado ? "none" : "1px solid #8FB0D6",
                               }}
                             >
-                              <BadgeCheck size={13} color={ref.destacado ? "#FFFFFF" : "#7FA893"} />
+                              <BadgeCheck size={13} color={ref.destacado ? "#FFFFFF" : "#8FB0D6"} />
                               <span
                                 style={{
                                   fontFamily: "'IBM Plex Mono', monospace",
                                   fontSize: 10,
-                                  color: ref.destacado ? "#FFFFFF" : "#7FA893",
+                                  color: ref.destacado ? "#FFFFFF" : "#8FB0D6",
                                   textTransform: "uppercase",
                                 }}
                               >
@@ -1383,11 +1383,11 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                                 padding: "3px 10px",
                                 borderRadius: 999,
                                 background: "transparent",
-                                border: "1px dashed #7A6E58",
+                                border: "1px dashed #7A8CA3",
                               }}
                             >
-                              <Info size={12} color="#B9AF97" />
-                              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#B9AF97", textTransform: "uppercase" }}>
+                              <Info size={12} color="#A9B4C2" />
+                              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#A9B4C2", textTransform: "uppercase" }}>
                                 Resultado de internet, no verificado
                               </span>
                             </div>
@@ -1399,10 +1399,10 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                               <>
                                 <a
                                   href={`tel:${ref.telefono}`}
-                                  style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", background: "#2A3A36", padding: "8px 14px", borderRadius: 999 }}
+                                  style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", background: "#061F3B", padding: "8px 14px", borderRadius: 999 }}
                                 >
-                                  <Phone size={14} color="#7FA893" />
-                                  <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#F3EDE2", fontWeight: 600 }}>
+                                  <Phone size={14} color="#8FB0D6" />
+                                  <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#FAF6EE", fontWeight: 600 }}>
                                     {ref.telefono}
                                   </span>
                                 </a>
@@ -1414,7 +1414,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                                     )}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", background: "#C4622A", padding: "8px 14px", borderRadius: 999 }}
+                                    style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", background: "#F58220", padding: "8px 14px", borderRadius: 999 }}
                                   >
                                     <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#FFFFFF", fontWeight: 600 }}>
                                       WhatsApp
@@ -1429,10 +1429,10 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ref.mapsQuery)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", background: "#2A3A36", padding: "8px 14px", borderRadius: 999 }}
+                                style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", background: "#061F3B", padding: "8px 14px", borderRadius: 999 }}
                               >
-                                <Globe size={14} color="#7FA893" />
-                                <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#F3EDE2", fontWeight: 600 }}>
+                                <Globe size={14} color="#8FB0D6" />
+                                <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#FAF6EE", fontWeight: 600 }}>
                                   Buscar en Google Maps
                                 </span>
                               </a>
@@ -1440,14 +1440,14 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                           </div>
                           {ref.direccion && (
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                              <MapPinned size={14} color="#7FA893" />
-                              <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#CFE0D6" }}>{ref.direccion}</span>
+                              <MapPinned size={14} color="#8FB0D6" />
+                              <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#FCEEDD" }}>{ref.direccion}</span>
                             </div>
                           )}
                           {ref.email && (
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                              <Mail size={14} color="#7FA893" />
-                              <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#CFE0D6" }}>{ref.email}</span>
+                              <Mail size={14} color="#8FB0D6" />
+                              <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#FCEEDD" }}>{ref.email}</span>
                             </div>
                           )}
                         </div>
@@ -1473,9 +1473,9 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
                 gap: 8,
                 padding: "10px 18px",
                 borderRadius: 999,
-                border: "1px solid #C4622A",
+                border: "1px solid #F58220",
                 background: "transparent",
-                color: "#C4622A",
+                color: "#F58220",
                 fontFamily: "Inter, sans-serif",
                 fontWeight: 600,
                 fontSize: 13,
@@ -1487,7 +1487,7 @@ export default function CasaIAChat({ agencySlug = null, agencyName = null, agenc
         </div>
       </div>
 
-      <div style={{ borderTop: "1px solid #E0D8C7", padding: "12px 16px", background: "#FFFFFF" }}>
+      <div style={{ borderTop: "1px solid #D6DEE8", padding: "12px 16px", background: "#FFFFFF" }}>
         {composer}
       </div>
 
@@ -1532,14 +1532,14 @@ function LangDropdown({ lang, changeLang, langMenuOpen, setLangMenuOpen }) {
           cursor: "pointer",
           padding: "6px 12px",
           borderRadius: 999,
-          background: "#2A3A36",
+          background: "#061F3B",
         }}
       >
         <current.Flag size={20} />
-        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "#CFE0D6", fontWeight: 700 }}>
+        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "#FCEEDD", fontWeight: 700 }}>
           {current.code.toUpperCase()}
         </span>
-        <ChevronDown size={13} color="#9FB3A9" />
+        <ChevronDown size={13} color="#A9BFD6" />
       </button>
 
       {langMenuOpen && menuPos && (
@@ -1575,13 +1575,13 @@ function LangDropdown({ lang, changeLang, langMenuOpen, setLangMenuOpen }) {
                   width: "100%",
                   padding: "10px 14px",
                   border: "none",
-                  background: l.code === lang ? "#F3EDE2" : "transparent",
+                  background: l.code === lang ? "#FAF6EE" : "transparent",
                   cursor: "pointer",
                   textAlign: "left",
                 }}
               >
                 <l.Flag size={20} />
-                <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#1F2D2B", fontWeight: l.code === lang ? 700 : 500 }}>
+                <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#082B52", fontWeight: l.code === lang ? 700 : 500 }}>
                   {l.name}
                 </span>
               </button>
@@ -1601,8 +1601,8 @@ const iconBtnStyle = {
   alignItems: "center",
   justifyContent: "center",
   flexShrink: 0,
-  background: "#F3EDE2",
-  border: "1px solid #E0D8C7",
+  background: "#FAF6EE",
+  border: "1px solid #D6DEE8",
 };
 
 const inputStyle = {
@@ -1610,7 +1610,7 @@ const inputStyle = {
   padding: "9px 12px",
   marginBottom: 8,
   borderRadius: 8,
-  border: "1px solid #E0D8C7",
+  border: "1px solid #D6DEE8",
   fontFamily: "Inter, sans-serif",
   fontSize: 13,
   outline: "none",
@@ -1631,15 +1631,15 @@ function Bubble({ msg, techLabel }) {
     >
       {!isUser && (
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, paddingLeft: 4 }}>
-          <Wrench size={11} color="#8A7A5C" />
-          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#8A7A5C" }}>{techLabel}</span>
+          <Wrench size={11} color="#6E89AC" />
+          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#6E89AC" }}>{techLabel}</span>
         </div>
       )}
       {msg.image && (
         <img
           src={msg.image.dataUrl}
           alt="foto enviada"
-          style={{ borderRadius: 12, marginBottom: 6, maxHeight: 208, objectFit: "cover", border: "1px solid #E0D8C7" }}
+          style={{ borderRadius: 12, marginBottom: 6, maxHeight: 208, objectFit: "cover", border: "1px solid #D6DEE8" }}
         />
       )}
       {msg.text && (
@@ -1649,11 +1649,11 @@ function Bubble({ msg, techLabel }) {
             borderRadius: 16,
             whiteSpace: "pre-wrap",
             lineHeight: 1.5,
-            background: isUser ? "#1F2D2B" : "#FFFFFF",
-            color: isUser ? "#F3EDE2" : "#2A332F",
+            background: isUser ? "#082B52" : "#FFFFFF",
+            color: isUser ? "#FAF6EE" : "#061F3B",
             fontFamily: "Inter, sans-serif",
             fontSize: 14,
-            border: isUser ? "none" : "1px solid #E9E2D2",
+            border: isUser ? "none" : "1px solid #F1EADC",
             borderTopRightRadius: isUser ? 4 : 16,
             borderTopLeftRadius: isUser ? 16 : 4,
           }}
@@ -1667,23 +1667,23 @@ function Bubble({ msg, techLabel }) {
             marginTop: 8,
             width: "100%",
             maxWidth: 320,
-            background: "#1F2D2B",
+            background: "#082B52",
             borderRadius: 14,
-            border: "1.5px dashed #C4622A",
+            border: "1.5px dashed #F58220",
             padding: "14px 16px",
             position: "relative",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-            <Ticket size={15} color="#C4622A" />
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#C4622A", textTransform: "uppercase", letterSpacing: 0.5 }}>
+            <Ticket size={15} color="#F58220" />
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#F58220", textTransform: "uppercase", letterSpacing: 0.5 }}>
               Cupón CasaIA
             </span>
           </div>
-          <div style={{ fontFamily: "'Roboto Slab', serif", fontSize: 15, fontWeight: 700, color: "#F3EDE2", marginBottom: 4 }}>
+          <div style={{ fontFamily: "'Roboto Slab', serif", fontSize: 15, fontWeight: 700, color: "#FAF6EE", marginBottom: 4 }}>
             {msg.coupon.nombre}
           </div>
-          <div style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#CFE0D6", marginBottom: 10, lineHeight: 1.4 }}>
+          <div style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#FCEEDD", marginBottom: 10, lineHeight: 1.4 }}>
             {msg.coupon.descuento}
           </div>
           <div
@@ -1691,14 +1691,14 @@ function Bubble({ msg, techLabel }) {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              borderTop: "1px dashed #4A5A54",
+              borderTop: "1px dashed #3A4A5C",
               paddingTop: 8,
             }}
           >
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "#8A7A5C" }}>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "#6E89AC" }}>
               Mostrá esto en el local
             </span>
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "#F3EDE2", fontWeight: 700 }}>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "#FAF6EE", fontWeight: 700 }}>
               {msg.coupon.code}
             </span>
           </div>
@@ -1716,7 +1716,7 @@ function formatText(text) {
     const trimmed = line.trim();
 
     if (/^(---|\*\*\*)$/.test(trimmed)) {
-      elements.push(<hr key={i} style={{ border: "none", borderTop: "1px solid #E9E2D2", margin: "10px 0" }} />);
+      elements.push(<hr key={i} style={{ border: "none", borderTop: "1px solid #F1EADC", margin: "10px 0" }} />);
       return;
     }
 
